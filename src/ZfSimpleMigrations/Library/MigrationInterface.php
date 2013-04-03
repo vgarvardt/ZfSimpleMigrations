@@ -4,34 +4,33 @@ namespace ZfSimpleMigrations\Library;
 
 use Zend\Db\Metadata\MetadataInterface;
 
-/**
- * Интерфейс который должны реализовывать классы миграций
- */
 interface MigrationInterface
 {
     /**
-     * Вернуть sql код выполнения миграции
+     * Get migrations queries
+     *
      * @return array
      */
     public function getUpSql();
 
     /**
-     * Вернуть sql код отката миграции
+     * Get migration rollback queries
+     *
      * @return array
      */
     public function getDownSql();
 
     /**
-     * Выполнить миграцию
+     * Apply migration
+     *
      * @param MetadataInterface $schema
      */
     public function up(MetadataInterface $schema);
 
     /**
-     * Откатить миграцию
+     * Rollback migration
+     *
      * @param MetadataInterface $schema
      */
     public function down(MetadataInterface $schema);
 }
-
-?>

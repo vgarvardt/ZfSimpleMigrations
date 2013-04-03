@@ -10,14 +10,14 @@ use ZfSimpleMigrations\Library\OutputWriter;
 use ZfSimpleMigrations\Model\MigrationVersionTable;
 
 /**
- * Основная логика работы с миграциями
+ * Main migration logic
  */
 class Migration
 {
     const MIGRATION_TABLE = 'migration_version';
 
-    protected $migrationClassFolder;
-    protected $namespaceMigrationsClasses;
+    protected $migrationsDir;
+    protected $migrationsNamespace;
     protected $adapter;
     /**
      * @var \Zend\Db\Adapter\Driver\ConnectionInterface
@@ -32,34 +32,35 @@ class Migration
      * @param array $config
      * @param \ZfSimpleMigrations\Model\MigrationVersionTable $migrationVersionTable
      * @param OutputWriter $writer
-     * @throws \Exception
+     * @throws MigrationException
      */
     public function __construct(Adapter $adapter, array $config, MigrationVersionTable $migrationVersionTable, OutputWriter $writer = null)
     {
         $this->adapter = $adapter;
         $this->metadata = new Metadata($this->adapter);
         $this->connection = $this->adapter->getDriver()->getConnection();
-        $this->migrationClassFolder = $config['dir'];
-        $this->namespaceMigrationsClasses = $config['namespace'];
+        $this->migrationsDir = $config['dir'];
+        $this->migrationsNamespace = $config['namespace'];
         $this->migrationVersionTable = $migrationVersionTable;
         $this->outputWriter = is_null($writer) ? new OutputWriter() : $writer;
 
-        if (is_null($this->migrationClassFolder))
-            throw new \Exception('Unknown directory!');
+        if (is_null($this->migrationsDir))
+            throw new MigrationException('Migrations directory not set!');
 
-        if (is_null($this->namespaceMigrationsClasses))
-            throw new \Exception('Unknown namespaces!');
+        if (is_null($this->migrationsNamespace))
+            throw new MigrationException('Unknown namespaces!');
 
-        if (!file_exists($this->migrationClassFolder))
-            if (!mkdir($this->migrationClassFolder, 0775))
-                throw new \Exception(sprintf('Not permitted to created directory %s',
-                    $this->migrationClassFolder));
+        if (!is_dir($this->migrationsDir)) {
+            if (!mkdir($this->migrationsDir, 0775)) {
+                throw new MigrationException(sprintf('Failed to create migrations directory %s', $this->migrationsDir));
+            }
+        }
 
         $this->checkCreateMigrationTable();
     }
 
     /**
-     * Создать таблицу миграций
+     * Create migrations table of not exists
      */
     protected function checkCreateMigrationTable()
     {
@@ -85,16 +86,16 @@ TABLE;
     }
 
     /**
-     * @param int $version Номер версии к которой нужно мигрировать, если не указано то будут выполнены все новые миграции
-     * @param bool $force Применять указанную миграцию без лишних вопросов
-     * @param bool $down Применить откат миграции указанной версии
+     * @param int $version target migration version, if not set all not applied available migrations will be applied
+     * @param bool $force force apply migration
+     * @param bool $down rollback migration
      * @throws MigrationException
      */
     public function migrate($version = null, $force = false, $down = false)
     {
         $migrations = $this->getMigrationClasses($force);
 
-        if (!is_null($version) && !$this->hasMigrationVersion($migrations, $version)) {
+        if (!is_null($version) && !$this->hasMigrationVersions($migrations, $version)) {
             throw new MigrationException(sprintf('Migration version %s is not found!', $version));
         }
 
@@ -108,14 +109,14 @@ TABLE;
             if ($version && $force) {
                 foreach ($migrations as $migration) {
                     if ($migration['version'] == $version) {
-                        // if existing migration is forced to apply - delete it's information from migrated
+                        // if existing migration is forced to apply - delete its information from migrated
                         // to avoid duplicate key error
                         if (!$down) $this->migrationVersionTable->delete($migration['version']);
                         $this->applyMigration($migration, $down);
                         break;
                     }
                 }
-                //номер миграции не указан либо указанный номер больше последней выполненной миграции -> миграция добавления
+                // target migration version not set or target version is greater than last applied migration -> apply migrations
             } elseif (is_null($version) || (!is_null($version) && $version > $currentMigrationVersion)) {
                 foreach ($migrations as $migration) {
                     if ($migration['version'] > $currentMigrationVersion) {
@@ -124,9 +125,9 @@ TABLE;
                         }
                     }
                 }
-                //номер миграции указан и версия ниже текущей -> откат миграции
+                // target migration version is set -> rollback migration
             } elseif (!is_null($version) && $version < $currentMigrationVersion) {
-                $migrationsByDesc = $this->sortMigrationByVersionDesc($migrations);
+                $migrationsByDesc = $this->sortMigrationsByVersionDesc($migrations);
                 foreach ($migrationsByDesc as $migration) {
                     if ($migration['version'] > $version && $migration['version'] <= $currentMigrationVersion) {
                         $this->applyMigration($migration, true);
@@ -147,11 +148,10 @@ TABLE;
     }
 
     /**
-     * Отсортировать миграции по версии в обратном порядке
      * @param \ArrayIterator $migrations
      * @return \ArrayIterator
      */
-    public function sortMigrationByVersionDesc(\ArrayIterator $migrations)
+    public function sortMigrationsByVersionDesc(\ArrayIterator $migrations)
     {
         $sortedMigrations = clone $migrations;
 
@@ -167,12 +167,13 @@ TABLE;
     }
 
     /**
-     * Проверить существование класса для номера миграции
+     * Check migrations classes existence
+     *
      * @param \ArrayIterator $migrations
-     * @param integer $version
-     * @return boolean
+     * @param int $version
+     * @return bool
      */
-    public function hasMigrationVersion(\ArrayIterator $migrations, $version)
+    public function hasMigrationVersions(\ArrayIterator $migrations, $version)
     {
         foreach ($migrations as $migration) {
             if ($migration['version'] == $version) return true;
@@ -182,11 +183,10 @@ TABLE;
     }
 
     /**
-     * Получить номер максимальной версии миграции
      * @param \ArrayIterator $migrations
-     * @return integer
+     * @return int
      */
-    public function getMaxMigrationNumber(\ArrayIterator $migrations)
+    public function getMaxMigrationVersion(\ArrayIterator $migrations)
     {
         $versions = array();
         foreach ($migrations as $migration) {
@@ -200,8 +200,6 @@ TABLE;
     }
 
     /**
-     * Найти список классов миграций
-     *
      * @param bool $all
      * @return \ArrayIterator
      */
@@ -209,16 +207,17 @@ TABLE;
     {
         $classes = new \ArrayIterator();
 
-        $iterator = new \GlobIterator(sprintf('%s/Version*.php', $this->migrationClassFolder), \FilesystemIterator::KEY_AS_FILENAME);
+        $iterator = new \GlobIterator(sprintf('%s/Version*.php', $this->migrationsDir), \FilesystemIterator::KEY_AS_FILENAME);
         foreach ($iterator as $item) {
             /** @var $item \SplFileInfo */
             if (preg_match('/(Version(\d+))\.php/', $item->getFilename(), $matches)) {
                 $applied = $this->migrationVersionTable->applied($matches[2]);
                 if ($all || !$applied) {
-                    $className = $this->namespaceMigrationsClasses . '\\' . $matches[1];
+                    $className = $this->migrationsNamespace . '\\' . $matches[1];
 
                     if (!class_exists($className))
-                        require_once $this->migrationClassFolder . '/' . $item->getFilename();
+                        /** @noinspection PhpIncludeInspection */
+                        require_once $this->migrationsDir . '/' . $item->getFilename();
 
                     if (class_exists($className)) {
                         $reflectionClass = new \ReflectionClass($className);
@@ -251,13 +250,13 @@ TABLE;
     protected function applyMigration(array $migration, $down = false)
     {
         /** @var $migrationObject AbstractMigration */
-        $migrationObject = new $migration['class']($this->metadata);
+        $migrationObject = new $migration['class']($this->metadata, $this->outputWriter);
 
-        $this->outputWriter->write(sprintf("Execute migration class %s %s", $migration['class'], $down ? 'down' : 'up'));
+        $this->outputWriter->writeLine(sprintf("Execute migration class %s %s", $migration['class'], $down ? 'down' : 'up'));
 
         $sqlList = $down ? $migrationObject->getDownSql() : $migrationObject->getUpSql();
         foreach ($sqlList as $sql) {
-            $this->outputWriter->write("Execute sql code  \n\n" . $sql . "\n");
+            $this->outputWriter->writeLine("Execute query:\n\n" . $sql);
             $this->connection->execute($sql);
         }
 
@@ -268,5 +267,3 @@ TABLE;
         }
     }
 }
-
-?>

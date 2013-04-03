@@ -2,9 +2,6 @@
 
 namespace ZfSimpleMigrations\Library;
 
-/**
- * Класс для вывода информации от миграций
- */
 class OutputWriter
 {
     private $closure;
@@ -19,13 +16,18 @@ class OutputWriter
     }
 
     /**
-     * Запись вывода в Closure функцию
-     *
-     * @param string $message  The message to write.
+     * @param string $message message to write
      */
     public function write($message)
     {
-        $closure = $this->closure;
-        $closure($message);
+        call_user_func($this->closure, $message);
+    }
+
+    /**
+     * @param $line
+     */
+    public function writeLine($line)
+    {
+        $this->write($line . "\n");
     }
 }

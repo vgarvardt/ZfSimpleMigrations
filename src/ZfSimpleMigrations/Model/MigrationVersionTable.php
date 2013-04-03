@@ -1,6 +1,7 @@
 <?php
 namespace ZfSimpleMigrations\Model;
 
+use Zend\Db\Sql\Select;
 use Zend\Db\TableGateway\TableGateway;
 
 class MigrationVersionTable
@@ -34,7 +35,7 @@ class MigrationVersionTable
 
     public function getCurrentVersion()
     {
-        $result = $this->tableGateway->select(function ($select) {
+        $result = $this->tableGateway->select(function (Select $select) {
             $select->order('version DESC')->limit(1);
         });
         if (!$result->count()) return 0;

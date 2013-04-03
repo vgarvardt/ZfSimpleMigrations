@@ -22,31 +22,12 @@ class MigrateController extends AbstractActionController
      * @var \ZfSimpleMigrations\Model\MigrationVersionTable
      */
     protected $migrationVersionTable;
-    /**
-     * @var OutputWriter
-     */
-    protected $output;
 
     public function onDispatch(MvcEvent $e)
     {
         if (!$this->getRequest() instanceof ConsoleRequest) {
             throw new \RuntimeException('You can only use this action from a console!');
         }
-
-        /** @var $adapter \Zend\Db\Adapter\Adapter */
-        $adapter = $this->getServiceLocator()->get('Zend\Db\Adapter\Adapter');
-        $config = $this->getServiceLocator()->get('Configuration');
-
-        $console = $this->getServiceLocator()->get('console');
-
-        if ($config['migrations']['show_log']) {
-            $this->output = new OutputWriter(function ($message) use ($console) {
-                $console->write($message . "\n");
-            });
-        }
-
-
-        $this->migration = new Migration($adapter, $config['migrations'], $this->getMigrationVersionTable(), $this->output);
 
         return parent::onDispatch($e);
     }
@@ -78,7 +59,7 @@ class MigrateController extends AbstractActionController
      */
     public function listAction()
     {
-        $migrations = $this->migration->getMigrationClasses($this->getRequest()->getParam('all'));
+        $migrations = $this->getMigration()->getMigrationClasses($this->getRequest()->getParam('all'));
         $list = array();
         foreach ($migrations as $m) {
             $list[] = sprintf("%s %s - %s", $m['applied'] ? '-' : '+', $m['version'], $m['description']);
@@ -93,19 +74,19 @@ class MigrateController extends AbstractActionController
     {
         $version = $this->getRequest()->getParam('version');
 
-        $migrations = $this->migration->getMigrationClasses();
+        $migrations = $this->getMigration()->getMigrationClasses();
         $currentMigrationVersion = $this->getMigrationVersionTable()->getCurrentVersion();
         $force = $this->getRequest()->getParam('force');
 
         if (is_null($version) && $force) {
             return "Can't force migration apply without migration version explicitly set.";
         }
-        if (!$force && is_null($version) && $currentMigrationVersion >= $this->migration->getMaxMigrationNumber($migrations)) {
+        if (!$force && is_null($version) && $currentMigrationVersion >= $this->getMigration()->getMaxMigrationVersion($migrations)) {
             return "No migrations to apply.\n";
         }
 
         try {
-            $this->migration->migrate($version, $force, $this->getRequest()->getParam('down'));
+            $this->getMigration()->migrate($version, $force, $this->getRequest()->getParam('down'));
             return "Migrations applied!\n";
         } catch (MigrationException $e) {
             return "ZfSimpleMigrations\\Library\\MigrationException\n" . $e->getMessage() . "\n";
@@ -134,5 +115,28 @@ class MigrateController extends AbstractActionController
             $this->migrationVersionTable = $this->getServiceLocator()->get('ZfSimpleMigrations\Model\MigrationVersionTable');
         }
         return $this->migrationVersionTable;
+    }
+
+    /**
+     * @return Migration
+     */
+    protected function getMigration()
+    {
+        if (!$this->migration) {
+            /** @var $adapter \Zend\Db\Adapter\Adapter */
+            $adapter = $this->getServiceLocator()->get('Zend\Db\Adapter\Adapter');
+            $config = $this->getServiceLocator()->get('Configuration');
+
+            $output = null;
+            if ($config['migrations']['show_log']) {
+                $console = $this->getServiceLocator()->get('console');
+                $output = new OutputWriter(function ($message) use ($console) {
+                    $console->write($message . "\n");
+                });
+            }
+
+            $this->migration = new Migration($adapter, $config['migrations'], $this->getMigrationVersionTable(), $output);
+        }
+        return $this->migration;
     }
 }
