@@ -1,6 +1,6 @@
 <?php
 
-namespace ZendDbMigrations\Library;
+namespace ZfSimpleMigrations\Library;
 
 /**
  * Генерирование каркаса миграции

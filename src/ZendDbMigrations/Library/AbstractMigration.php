@@ -1,9 +1,9 @@
 <?php
 
-namespace ZendDbMigrations\Library;
+namespace ZfSimpleMigrations\Library;
 
 use Zend\Db\Metadata\MetadataInterface;
-use ZendDbMigrations\Library\MigrationInterface;
+use ZfSimpleMigrations\Library\MigrationInterface;
 /**
  * Абстрактный класс для миграций
  */

@@ -1,14 +1,14 @@
 <?php
 
-namespace ZendDbMigrations\Library;
+namespace ZfSimpleMigrations\Library;
 
 use Zend\Db\Metadata\MetadataInterface;
 
 /**
  * Интерфейс который должны реализовывать классы миграций
  */
-interface MigrationInterface {
-
+interface MigrationInterface
+{
     /**
      * Вернуть sql код выполнения миграции
      * @return array
@@ -26,7 +26,7 @@ interface MigrationInterface {
      * @param MetadataInterface $schema
      */
     public function up(MetadataInterface $schema);
-    
+
     /**
      * Откатить миграцию
      * @param MetadataInterface $schema

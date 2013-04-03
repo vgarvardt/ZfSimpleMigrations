@@ -1,13 +1,13 @@
 <?php
 
-namespace ZendDbMigrations\Library;
+namespace ZfSimpleMigrations\Library;
 
 use Zend\Db\Adapter\Adapter;
 use Zend\Db\Adapter\Driver\Pdo\Pdo;
 use Zend\Db\Adapter\Exception\InvalidQueryException;
 use Zend\Db\Metadata\Metadata;
-use ZendDbMigrations\Library\OutputWriter;
-use ZendDbMigrations\Model\MigrationVersionTable;
+use ZfSimpleMigrations\Library\OutputWriter;
+use ZfSimpleMigrations\Model\MigrationVersionTable;
 
 /**
  * Основная логика работы с миграциями

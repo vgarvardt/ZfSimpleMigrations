@@ -1,29 +1,26 @@
 <?php
-/**
- * Zend Framework (http://framework.zend.com/)
- *
- * @link      http://github.com/zendframework/ZendSkeletonApplication for the canonical source repository
- * @copyright Copyright (c) 2005-2012 Zend Technologies USA Inc. (http://www.zend.com)
- * @license   http://framework.zend.com/license/new-bsd New BSD License
- */
-
-namespace ZendDbMigrations;
+namespace ZfSimpleMigrations;
 
 use Zend\Db\ResultSet\ResultSet;
 use Zend\Db\TableGateway\TableGateway;
+use Zend\EventManager\EventInterface;
+use Zend\ModuleManager\Feature\BootstrapListenerInterface;
+use Zend\ModuleManager\Feature\ServiceProviderInterface;
 use Zend\Mvc\ModuleRouteListener;
-use Zend\Mvc\MvcEvent;
 use Zend\ModuleManager\Feature\AutoloaderProviderInterface;
 use Zend\ModuleManager\Feature\ConfigProviderInterface;
 use Zend\ModuleManager\Feature\ConsoleUsageProviderInterface;
 use Zend\Console\Adapter\AdapterInterface as Console;
+use Zend\ServiceManager\ServiceLocatorInterface;
 
 class Module implements
     AutoloaderProviderInterface,
     ConfigProviderInterface,
-    ConsoleUsageProviderInterface
+    ConsoleUsageProviderInterface,
+    ServiceProviderInterface,
+    BootstrapListenerInterface
 {
-    public function onBootstrap(MvcEvent $e)
+    public function onBootstrap(EventInterface $e)
     {
         $e->getApplication()->getServiceManager()->get('translator');
         $eventManager = $e->getApplication()->getEventManager();
@@ -51,14 +48,15 @@ class Module implements
     {
         return array(
             'factories' => array(
-                'ZendDbMigrations\Model\MigrationVersionTable' => function ($sm) {
-                    /** @var $sm */
-                    $tableGateway = $sm->get('MigrationVersionTableGateway');
+                'ZfSimpleMigrations\Model\MigrationVersionTable' => function (ServiceLocatorInterface $serviceLocator) {
+                    /** @var $tableGateway TableGateway */
+                    $tableGateway = $serviceLocator->get('ZfSimpleMigrationsVersionTableGateway');
                     $table = new Model\MigrationVersionTable($tableGateway);
                     return $table;
                 },
-                'MigrationVersionTableGateway' => function ($sm) {
-                    $dbAdapter = $sm->get('Zend\Db\Adapter\Adapter');
+                'ZfSimpleMigrationsVersionTableGateway' => function (ServiceLocatorInterface $serviceLocator) {
+                    /** @var $dbAdapter \Zend\Db\Adapter\Adapter */
+                    $dbAdapter = $serviceLocator->get('Zend\Db\Adapter\Adapter');
                     $resultSetPrototype = new ResultSet();
                     $resultSetPrototype->setArrayObjectPrototype(new Model\MigrationVersion());
                     return new TableGateway(Library\Migration::MIGRATION_TABLE, $dbAdapter, null, $resultSetPrototype);
@@ -70,14 +68,14 @@ class Module implements
     public function getConsoleUsage(Console $console)
     {
         return array(
-            'Migrations',
+            'ZF2 Simple Migrations',
 
             'migration version' => 'Get current migration version',
 
             'migration list [--all]' => 'List available migrations',
             array('--all', 'Include applied migrations'),
 
-            'migration migrate [<version>]' => 'Execute migrate',
+            'migration apply [<version>] [--force]' => 'Execute migrate',
             array(
                 '--force',
                 'Force apply migration even if it\'s older than the last migrated. Works only with <version> explicitly set.'

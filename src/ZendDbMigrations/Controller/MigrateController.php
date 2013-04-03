@@ -1,21 +1,13 @@
 <?php
-/**
- * Zend Framework (http://framework.zend.com/)
- *
- * @link      http://github.com/zendframework/ZendSkeletonApplication for the canonical source repository
- * @copyright Copyright (c) 2005-2012 Zend Technologies USA Inc. (http://www.zend.com)
- * @license   http://framework.zend.com/license/new-bsd New BSD License
- */
-
-namespace ZendDbMigrations\Controller;
+namespace ZfSimpleMigrations\Controller;
 
 use Zend\Mvc\Controller\AbstractActionController;
 use Zend\Mvc\MvcEvent;
 use Zend\Console\Request as ConsoleRequest;
-use ZendDbMigrations\Library\Migration;
-use ZendDbMigrations\Library\MigrationException;
-use ZendDbMigrations\Library\GeneratorMigrationClass;
-use ZendDbMigrations\Library\OutputWriter;
+use ZfSimpleMigrations\Library\Migration;
+use ZfSimpleMigrations\Library\MigrationException;
+use ZfSimpleMigrations\Library\GeneratorMigrationClass;
+use ZfSimpleMigrations\Library\OutputWriter;
 
 /**
  * Контроллер обеспечивает вызов комманд миграций

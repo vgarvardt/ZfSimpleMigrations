@@ -1,11 +1,5 @@
 <?php
-/**
- * User: Vladimir Garvardt
- * Date: 2/14/13
- * Time: 5:24 PM
- */
-
-namespace ZendDbMigrations\Model;
+namespace ZfSimpleMigrations\Model;
 
 
 class MigrationVersion

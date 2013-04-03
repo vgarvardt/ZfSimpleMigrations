@@ -1,7 +1,7 @@
 <?php
 
-namespace ZendDbMigrations\Library;
- 
-class MigrationException extends \Exception {}
+namespace ZfSimpleMigrations\Library;
 
-?>
+class MigrationException extends \Exception
+{
+}

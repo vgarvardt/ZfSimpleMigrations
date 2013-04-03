@@ -1,11 +1,5 @@
 <?php
-/**
- * User: Vladimir Garvardt
- * Date: 2/14/13
- * Time: 5:40 PM
- */
-
-namespace ZendDbMigrations\Model;
+namespace ZfSimpleMigrations\Model;
 
 use Zend\Db\TableGateway\TableGateway;
 
