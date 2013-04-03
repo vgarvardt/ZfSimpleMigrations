@@ -6,11 +6,11 @@ use Zend\Mvc\MvcEvent;
 use Zend\Console\Request as ConsoleRequest;
 use ZfSimpleMigrations\Library\Migration;
 use ZfSimpleMigrations\Library\MigrationException;
-use ZfSimpleMigrations\Library\GeneratorMigrationClass;
+use ZfSimpleMigrations\Library\MigrationSkeletonGenerator;
 use ZfSimpleMigrations\Library\OutputWriter;
 
 /**
- * Контроллер обеспечивает вызов комманд миграций
+ * Migration commands controller
  */
 class MigrateController extends AbstractActionController
 {
@@ -52,7 +52,7 @@ class MigrateController extends AbstractActionController
     }
 
     /**
-     * Overrided only for PHPDoc return value for IDE code helpers
+     * Overridden only for PHPDoc return value for IDE code helpers
      *
      * @return ConsoleRequest
      */
@@ -62,14 +62,20 @@ class MigrateController extends AbstractActionController
     }
 
     /**
-     * Получить текущую версию миграции
-     * @return integer
+     * Get current migration version
+     *
+     * @return int
      */
     public function versionAction()
     {
         return sprintf("Current version %s\n", $this->getMigrationVersionTable()->getCurrentVersion());
     }
 
+    /**
+     * List migrations - not applied by default, all with 'all' flag.
+     *
+     * @return string
+     */
     public function listAction()
     {
         $migrations = $this->migration->getMigrationClasses($this->getRequest()->getParam('all'));
@@ -77,11 +83,11 @@ class MigrateController extends AbstractActionController
         foreach ($migrations as $m) {
             $list[] = sprintf("%s %s - %s", $m['applied'] ? '-' : '+', $m['version'], $m['description']);
         }
-        return (empty($list) ? 'No migrations to execute.' : implode("\n", $list)) . "\n";
+        return (empty($list) ? 'No migrations available.' : implode("\n", $list)) . "\n";
     }
 
     /**
-     * Мигрировать
+     * Apply migration
      */
     public function applyAction()
     {
@@ -92,31 +98,31 @@ class MigrateController extends AbstractActionController
         $force = $this->getRequest()->getParam('force');
 
         if (is_null($version) && $force) {
-            return "Can't force migrate without migration version explicitly set.";
+            return "Can't force migration apply without migration version explicitly set.";
         }
         if (!$force && is_null($version) && $currentMigrationVersion >= $this->migration->getMaxMigrationNumber($migrations)) {
-            return "No migrations to execute.\n";
+            return "No migrations to apply.\n";
         }
 
         try {
             $this->migration->migrate($version, $force, $this->getRequest()->getParam('down'));
-            return "Migrations executed!\n";
+            return "Migrations applied!\n";
         } catch (MigrationException $e) {
             return "ZfSimpleMigrations\\Library\\MigrationException\n" . $e->getMessage() . "\n";
         }
     }
 
     /**
-     * Сгенерировать каркасный класс для новой миграции
+     * Generate new migration skeleton class
      */
-    public function generateMigrationClassAction()
+    public function generateSkeletonAction()
     {
-        $config = $this->getServiceLocator()->get('Configuration');
+        $config = $this->getServiceLocator()->get('Config');
 
-        $generator = new GeneratorMigrationClass($config['migrations']['dir'], $config['migrations']['namespace']);
+        $generator = new MigrationSkeletonGenerator($config['migrations']['dir'], $config['migrations']['namespace']);
         $classPath = $generator->generate();
 
-        return sprintf("Generated class %s\n", realpath($classPath));
+        return sprintf("Generated skeleton class @ %s\n", realpath($classPath));
     }
 
     /**

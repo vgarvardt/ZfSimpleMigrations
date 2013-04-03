@@ -45,7 +45,7 @@ return array(
                         'route' => 'migration generate [--env=]',
                         'defaults' => array(
                             'controller' => 'ZfSimpleMigrations\Controller\Migrate',
-                            'action' => 'generateMigrationClass'
+                            'action' => 'generateSkeleton'
                         )
                     )
                 )

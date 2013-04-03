@@ -20,6 +20,10 @@ class Module implements
     ServiceProviderInterface,
     BootstrapListenerInterface
 {
+    /**
+     * @param EventInterface|\Zend\Mvc\MvcEvent $e
+     * @return array|void
+     */
     public function onBootstrap(EventInterface $e)
     {
         $e->getApplication()->getServiceManager()->get('translator');
@@ -68,7 +72,7 @@ class Module implements
     public function getConsoleUsage(Console $console)
     {
         return array(
-            'ZF2 Simple Migrations',
+            'Simple Migrations',
 
             'migration version' => 'Get current migration version',
 

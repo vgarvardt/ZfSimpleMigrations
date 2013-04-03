@@ -3,9 +3,9 @@
 namespace ZfSimpleMigrations\Library;
 
 /**
- * Генерирование каркаса миграции
+ * Migration skeleton class generator
  */
-class GeneratorMigrationClass
+class MigrationSkeletonGenerator
 {
     protected $migrationsFolder;
     protected $migrationNamespace;
