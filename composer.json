@@ -1,0 +1,37 @@
+{
+    "name": "vgarvardt/zf-simple-migrations",
+    "description": "Module for database migrations managment.",
+    "type": "library",
+    "license": "BSD-3-Clause",
+    "keywords": [
+        "database",
+        "db",
+        "migrations",
+        "zf2"
+    ],
+    "homepage": "https://github.com/vgarvardt/ZfSimpleMigrations",
+    "authors": [
+        {
+            "name": "Vadim Knyzev",
+            "email": "vadim.knyzev@gmail.com",
+            "homepage": "http://vadim-knyzev.blogspot.com/"
+        },
+        {
+            "name": "Vladimir Garvardt",
+            "email": "vgarvardt@gmail.com",
+            "homepage": "http://www.linkedin.com/in/vgarvardt/"
+        }
+    ],
+    "require": {
+        "php": ">=5.3.3",
+        "zendframework/zendframework": "2.*"
+    },
+    "autoload": {
+        "psr-0": {
+            "ZfSimpleMigrations": "src/"
+        },
+        "classmap": [
+            "./Module.php"
+        ]
+    }
+}
