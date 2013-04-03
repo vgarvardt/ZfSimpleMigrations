@@ -30,7 +30,7 @@ class Migration
     /**
      * @param \Zend\Db\Adapter\Adapter $adapter
      * @param array $config
-     * @param \ZendDbMigrations\Model\MigrationVersionTable $migrationVersionTable
+     * @param \ZfSimpleMigrations\Model\MigrationVersionTable $migrationVersionTable
      * @param OutputWriter $writer
      * @throws \Exception
      */
@@ -224,7 +224,7 @@ TABLE;
                         $reflectionClass = new \ReflectionClass($className);
                         $reflectionDescription = new \ReflectionProperty($className, 'description');
 
-                        if ($reflectionClass->implementsInterface('ZendDbMigrations\Library\MigrationInterface')) {
+                        if ($reflectionClass->implementsInterface('ZfSimpleMigrations\Library\MigrationInterface')) {
                             $classes->append(array(
                                 'version' => $matches[2],
                                 'class' => $className,

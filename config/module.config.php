@@ -3,7 +3,7 @@
 return array(
     'migrations' => array(
         'dir' => dirname(__FILE__) . '/../../../../migrations',
-        'namespace' => 'ZendDbMigrations\Migrations',
+        'namespace' => 'ZfSimpleMigrations\Migrations',
         'show_log' => true
     ),
     'console' => array(
@@ -14,7 +14,7 @@ return array(
                     'options' => array(
                         'route' => 'migration version [--env=]',
                         'defaults' => array(
-                            'controller' => 'ZendDbMigrations\Controller\Migrate',
+                            'controller' => 'ZfSimpleMigrations\Controller\Migrate',
                             'action' => 'version'
                         )
                     )
@@ -24,18 +24,18 @@ return array(
                     'options' => array(
                         'route' => 'migration list [--env=] [--all]',
                         'defaults' => array(
-                            'controller' => 'ZendDbMigrations\Controller\Migrate',
+                            'controller' => 'ZfSimpleMigrations\Controller\Migrate',
                             'action' => 'list'
                         )
                     )
                 ),
-                'migration-migrate' => array(
+                'migration-apply' => array(
                     'type' => 'simple',
                     'options' => array(
-                        'route' => 'migration migrate [<version>] [--env=] [--force] [--down]',
+                        'route' => 'migration apply [<version>] [--env=] [--force] [--down]',
                         'defaults' => array(
-                            'controller' => 'ZendDbMigrations\Controller\Migrate',
-                            'action' => 'migrate'
+                            'controller' => 'ZfSimpleMigrations\Controller\Migrate',
+                            'action' => 'apply'
                         )
                     )
                 ),
@@ -44,7 +44,7 @@ return array(
                     'options' => array(
                         'route' => 'migration generate [--env=]',
                         'defaults' => array(
-                            'controller' => 'ZendDbMigrations\Controller\Migrate',
+                            'controller' => 'ZfSimpleMigrations\Controller\Migrate',
                             'action' => 'generateMigrationClass'
                         )
                     )
@@ -54,7 +54,7 @@ return array(
     ),
     'controllers' => array(
         'invokables' => array(
-            'ZendDbMigrations\Controller\Migrate' => 'ZendDbMigrations\Controller\MigrateController'
+            'ZfSimpleMigrations\Controller\Migrate' => 'ZfSimpleMigrations\Controller\MigrateController'
         ),
     ),
     'view_manager' => array(

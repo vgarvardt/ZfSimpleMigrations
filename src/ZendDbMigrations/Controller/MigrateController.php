@@ -15,11 +15,11 @@ use ZfSimpleMigrations\Library\OutputWriter;
 class MigrateController extends AbstractActionController
 {
     /**
-     * @var \ZendDbMigrations\Library\Migration
+     * @var \ZfSimpleMigrations\Library\Migration
      */
     protected $migration;
     /**
-     * @var \ZendDbMigrations\Model\MigrationVersionTable
+     * @var \ZfSimpleMigrations\Model\MigrationVersionTable
      */
     protected $migrationVersionTable;
     /**
@@ -45,10 +45,20 @@ class MigrateController extends AbstractActionController
             });
         }
 
-        $this->migrationVersionTable = $this->getServiceLocator()->get('ZendDbMigrations\Model\MigrationVersionTable');
-        $this->migration = new Migration($adapter, $config['migrations'], $this->migrationVersionTable, $this->output);
+
+        $this->migration = new Migration($adapter, $config['migrations'], $this->getMigrationVersionTable(), $this->output);
 
         return parent::onDispatch($e);
+    }
+
+    /**
+     * Overrided only for PHPDoc return value for IDE code helpers
+     *
+     * @return ConsoleRequest
+     */
+    public function getRequest()
+    {
+        return parent::getRequest();
     }
 
     /**
@@ -57,7 +67,7 @@ class MigrateController extends AbstractActionController
      */
     public function versionAction()
     {
-        return sprintf("Current version %s\n", $this->migrationVersionTable->getCurrentVersion());
+        return sprintf("Current version %s\n", $this->getMigrationVersionTable()->getCurrentVersion());
     }
 
     public function listAction()
@@ -73,12 +83,12 @@ class MigrateController extends AbstractActionController
     /**
      * Мигрировать
      */
-    public function migrateAction()
+    public function applyAction()
     {
         $version = $this->getRequest()->getParam('version');
 
         $migrations = $this->migration->getMigrationClasses();
-        $currentMigrationVersion = $this->migrationVersionTable->getCurrentVersion();
+        $currentMigrationVersion = $this->getMigrationVersionTable()->getCurrentVersion();
         $force = $this->getRequest()->getParam('force');
 
         if (is_null($version) && $force) {
@@ -92,7 +102,7 @@ class MigrateController extends AbstractActionController
             $this->migration->migrate($version, $force, $this->getRequest()->getParam('down'));
             return "Migrations executed!\n";
         } catch (MigrationException $e) {
-            return "ZendDbMigrations\\Library\\MigrationException\n" . $e->getMessage() . "\n";
+            return "ZfSimpleMigrations\\Library\\MigrationException\n" . $e->getMessage() . "\n";
         }
     }
 
@@ -107,5 +117,16 @@ class MigrateController extends AbstractActionController
         $classPath = $generator->generate();
 
         return sprintf("Generated class %s\n", realpath($classPath));
+    }
+
+    /**
+     * @return \ZfSimpleMigrations\Model\MigrationVersionTable
+     */
+    protected function getMigrationVersionTable()
+    {
+        if (!$this->migrationVersionTable) {
+            $this->migrationVersionTable = $this->getServiceLocator()->get('ZfSimpleMigrations\Model\MigrationVersionTable');
+        }
+        return $this->migrationVersionTable;
     }
 }

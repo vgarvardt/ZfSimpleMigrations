@@ -31,15 +31,15 @@ migration generate - Сгенерировать каркас класса миг
 поэтому нужно создать папку migrations или запускать команду генерации каркаса миграций с правами на запись в корневую директорию
 
 В общем случае классы миграций должны иметь название вида 
-Versionггггммддччммссс.php и реализовывать интерфейс ZendDbMigrations\Library\MigrationInterface
+Versionггггммддччммссс.php и реализовывать интерфейс ZfSimpleMigrations\Library\MigrationInterface
 
 Пример класса миграции
 ``` php
 <?php
 
-namespace ZendDbMigrations\Migrations;
+namespace ZfSimpleMigrations\Migrations;
 
-use ZendDbMigrations\Library\AbstractMigration;
+use ZfSimpleMigrations\Library\AbstractMigration;
 use Zend\Db\Metadata\MetadataInterface;
 
 class Version20121112230913 extends AbstractMigration

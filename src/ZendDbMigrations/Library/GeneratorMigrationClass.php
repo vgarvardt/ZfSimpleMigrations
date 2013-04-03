@@ -60,7 +60,7 @@ class GeneratorMigrationClass
 
 namespace %s;
 
-use ZendDbMigrations\Library\AbstractMigration;
+use ZfSimpleMigrations\Library\AbstractMigration;
 use Zend\Db\Metadata\MetadataInterface;
 
 class %s extends AbstractMigration
