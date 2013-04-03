@@ -74,19 +74,19 @@ class Module implements
         return array(
             'Simple Migrations',
 
-            'migration version' => 'Get current migration version',
+            'migration version' => 'Get last applied migration version',
 
             'migration list [--all]' => 'List available migrations',
             array('--all', 'Include applied migrations'),
 
-            'migration apply [<version>] [--force]' => 'Execute migrate',
+            'migration apply [<version>] [--force]' => 'Execute migration',
             array(
                 '--force',
                 'Force apply migration even if it\'s older than the last migrated. Works only with <version> explicitly set.'
             ),
             array('--down', 'Force apply down migration. Works only with --force flag set.'),
 
-            'migration generate' => 'Generate new migration class'
+            'migration generate' => 'Generate new migration skeleton class'
         );
     }
 }
