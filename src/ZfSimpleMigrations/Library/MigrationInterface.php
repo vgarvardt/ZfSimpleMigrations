@@ -33,6 +33,4 @@ interface MigrationInterface
      * @param MetadataInterface $schema
      */
     public function down(MetadataInterface $schema);
-
-    public function getMetadata();
 }
