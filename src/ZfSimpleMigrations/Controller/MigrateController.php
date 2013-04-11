@@ -18,10 +18,6 @@ class MigrateController extends AbstractActionController
      * @var \ZfSimpleMigrations\Library\Migration
      */
     protected $migration;
-    /**
-     * @var \ZfSimpleMigrations\Model\MigrationVersionTable
-     */
-    protected $migrationVersionTable;
 
     public function onDispatch(MvcEvent $e)
     {
@@ -49,7 +45,7 @@ class MigrateController extends AbstractActionController
      */
     public function versionAction()
     {
-        return sprintf("Current version %s\n", $this->getMigrationVersionTable()->getCurrentVersion());
+        return sprintf("Current version %s\n", $this->getMigration()->getCurrentVersion());
     }
 
     /**
@@ -75,7 +71,7 @@ class MigrateController extends AbstractActionController
         $version = $this->getRequest()->getParam('version');
 
         $migrations = $this->getMigration()->getMigrationClasses();
-        $currentMigrationVersion = $this->getMigrationVersionTable()->getCurrentVersion();
+        $currentMigrationVersion = $this->getMigration()->getCurrentVersion();
         $force = $this->getRequest()->getParam('force');
 
         if (is_null($version) && $force) {
@@ -107,17 +103,6 @@ class MigrateController extends AbstractActionController
     }
 
     /**
-     * @return \ZfSimpleMigrations\Model\MigrationVersionTable
-     */
-    protected function getMigrationVersionTable()
-    {
-        if (!$this->migrationVersionTable) {
-            $this->migrationVersionTable = $this->getServiceLocator()->get('ZfSimpleMigrations\Model\MigrationVersionTable');
-        }
-        return $this->migrationVersionTable;
-    }
-
-    /**
      * @return Migration
      */
     protected function getMigration()
@@ -135,7 +120,10 @@ class MigrateController extends AbstractActionController
                 });
             }
 
-            $this->migration = new Migration($adapter, $config['migrations'], $this->getMigrationVersionTable(), $output);
+            /** @var $migrationVersionTable \ZfSimpleMigrations\Model\MigrationVersionTable */
+            $migrationVersionTable = $this->getServiceLocator()->get('ZfSimpleMigrations\Model\MigrationVersionTable');
+
+            $this->migration = new Migration($adapter, $config['migrations'], $migrationVersionTable, $output);
         }
         return $this->migration;
     }

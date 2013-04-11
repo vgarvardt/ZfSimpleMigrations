@@ -86,6 +86,14 @@ TABLE;
     }
 
     /**
+     * @return int
+     */
+    public function getCurrentVersion()
+    {
+        return $this->migrationVersionTable->getCurrentVersion();
+    }
+
+    /**
      * @param int $version target migration version, if not set all not applied available migrations will be applied
      * @param bool $force force apply migration
      * @param bool $down rollback migration
