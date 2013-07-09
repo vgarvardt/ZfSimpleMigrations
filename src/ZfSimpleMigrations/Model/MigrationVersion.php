@@ -4,6 +4,8 @@ namespace ZfSimpleMigrations\Model;
 
 class MigrationVersion
 {
+    const TABLE_NAME = 'migration_version';
+
     /**
      * @var int
      */

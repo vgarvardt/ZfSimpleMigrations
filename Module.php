@@ -63,7 +63,7 @@ class Module implements
                     $dbAdapter = $serviceLocator->get('Zend\Db\Adapter\Adapter');
                     $resultSetPrototype = new ResultSet();
                     $resultSetPrototype->setArrayObjectPrototype(new Model\MigrationVersion());
-                    return new TableGateway(Library\Migration::MIGRATION_TABLE, $dbAdapter, null, $resultSetPrototype);
+                    return new TableGateway(Model\MigrationVersion::TABLE_NAME, $dbAdapter, null, $resultSetPrototype);
                 },
             ),
         );

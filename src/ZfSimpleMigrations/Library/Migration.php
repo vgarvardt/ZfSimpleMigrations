@@ -6,7 +6,10 @@ use Zend\Db\Adapter\Adapter;
 use Zend\Db\Adapter\Driver\Pdo\Pdo;
 use Zend\Db\Adapter\Exception\InvalidQueryException;
 use Zend\Db\Metadata\Metadata;
+use Zend\Db\Sql\Ddl;
+use Zend\Db\Sql\Sql;
 use ZfSimpleMigrations\Library\OutputWriter;
+use ZfSimpleMigrations\Model\MigrationVersion;
 use ZfSimpleMigrations\Model\MigrationVersionTable;
 
 /**
@@ -64,25 +67,20 @@ class Migration
      */
     protected function checkCreateMigrationTable()
     {
-        if (strpos($this->connection->getDriverName(), 'mysql') !== false) {
-            $sql = <<<TABLE
-CREATE TABLE IF NOT EXISTS `%s` (
-  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `version` bigint(20) unsigned NOT NULL,
-  PRIMARY KEY (`id`),
-  KEY `version` (`version`)
-);
-TABLE;
-        } else {
-            $sql = <<<TABLE
-CREATE TABLE IF NOT EXISTS "%s" (
-  "id"  SERIAL NOT NULL,
-  "version" bigint NOT NULL,
-  PRIMARY KEY ("id")
-);
-TABLE;
+        $table = new Ddl\CreateTable(MigrationVersion::TABLE_NAME);
+        $table->addColumn(new Ddl\Column\Integer('id', false, null, array('autoincrement' => true)));
+        $table->addColumn(new Ddl\Column\BigInteger('version'));
+        $table->addConstraint(new Ddl\Constraint\PrimaryKey('id'));
+        $table->addConstraint(new Ddl\Constraint\UniqueKey('version'));
+
+        $sql = new Sql($this->adapter);
+
+        try {
+            $this->adapter->query($sql->getSqlStringForSqlObject($table), Adapter::QUERY_MODE_EXECUTE);
+        } catch (\Exception $e) {
+            // currently there are no db-independent way to check if table exists
+            // so we assume that table exists when we catch exception
         }
-        $this->connection->execute(sprintf($sql, Migration::MIGRATION_TABLE));
     }
 
     /**
@@ -225,7 +223,7 @@ TABLE;
 
                     if (!class_exists($className))
                         /** @noinspection PhpIncludeInspection */
-                        require_once $this->migrationsDir . '/' . $item->getFilename();
+                    require_once $this->migrationsDir . '/' . $item->getFilename();
 
                     if (class_exists($className)) {
                         $reflectionClass = new \ReflectionClass($className);
