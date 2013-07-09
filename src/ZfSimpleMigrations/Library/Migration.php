@@ -17,8 +17,6 @@ use ZfSimpleMigrations\Model\MigrationVersionTable;
  */
 class Migration
 {
-    const MIGRATION_TABLE = 'migration_version';
-
     protected $migrationsDir;
     protected $migrationsNamespace;
     protected $adapter;
