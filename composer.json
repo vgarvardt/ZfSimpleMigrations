@@ -1,6 +1,6 @@
 {
     "name": "vgarvardt/zf-simple-migrations",
-    "description": "Module for database migrations managment.",
+    "description": "Module for database migrations management.",
     "type": "library",
     "license": "BSD-3-Clause",
     "keywords": [
@@ -19,7 +19,7 @@
         {
             "name": "Vladimir Garvardt",
             "email": "vgarvardt@gmail.com",
-            "homepage": "http://www.linkedin.com/in/vgarvardt/"
+            "homepage": "http://itskrig.com/"
         }
     ],
     "require": {
