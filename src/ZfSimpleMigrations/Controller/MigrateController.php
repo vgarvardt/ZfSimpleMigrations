@@ -68,24 +68,29 @@ class MigrateController extends AbstractActionController
      */
     public function applyAction()
     {
-        $version = $this->getRequest()->getParam('version');
-
         $migrations = $this->getMigration()->getMigrationClasses();
         $currentMigrationVersion = $this->getMigration()->getCurrentVersion();
+
+        $version = $this->getRequest()->getParam('version');
         $force = $this->getRequest()->getParam('force');
+        $down = $this->getRequest()->getParam('down');
+        $fake = $this->getRequest()->getParam('fake');
 
         if (is_null($version) && $force) {
             return "Can't force migration apply without migration version explicitly set.";
+        }
+        if (is_null($version) && $fake) {
+            return "Can't fake migration apply without migration version explicitly set.";
         }
         if (!$force && is_null($version) && $currentMigrationVersion >= $this->getMigration()->getMaxMigrationVersion($migrations)) {
             return "No migrations to apply.\n";
         }
 
         try {
-            $this->getMigration()->migrate($version, $force, $this->getRequest()->getParam('down'));
+            $this->getMigration()->migrate($version, $force, $down, $fake);
             return "Migrations applied!\n";
         } catch (MigrationException $e) {
-            return "ZfSimpleMigrations\\Library\\MigrationException\n" . $e->getMessage() . "\n";
+            return get_class($e) . "\n" . $e->getMessage() . "\n";
         }
     }
 
@@ -100,6 +105,14 @@ class MigrateController extends AbstractActionController
         $classPath = $generator->generate();
 
         return sprintf("Generated skeleton class @ %s\n", realpath($classPath));
+    }
+
+    /**
+     * @return \ZfSimpleMigrations\Model\MigrationVersionTable
+     */
+    protected function getMigrationVersionTable()
+    {
+        return $this->getServiceLocator()->get('ZfSimpleMigrations\Model\MigrationVersionTable');
     }
 
     /**
@@ -120,10 +133,7 @@ class MigrateController extends AbstractActionController
                 });
             }
 
-            /** @var $migrationVersionTable \ZfSimpleMigrations\Model\MigrationVersionTable */
-            $migrationVersionTable = $this->getServiceLocator()->get('ZfSimpleMigrations\Model\MigrationVersionTable');
-
-            $this->migration = new Migration($adapter, $config['migrations'], $migrationVersionTable, $output);
+            $this->migration = new Migration($adapter, $config['migrations'], $this->getMigrationVersionTable(), $output);
         }
         return $this->migration;
     }

@@ -32,7 +32,7 @@ return array(
                 'migration-apply' => array(
                     'type' => 'simple',
                     'options' => array(
-                        'route' => 'migration apply [<version>] [--env=] [--force] [--down]',
+                        'route' => 'migration apply [<version>] [--env=] [--force] [--down] [--fake]',
                         'defaults' => array(
                             'controller' => 'ZfSimpleMigrations\Controller\Migrate',
                             'action' => 'apply'

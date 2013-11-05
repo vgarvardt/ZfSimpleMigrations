@@ -53,18 +53,18 @@ class Module implements
         return array(
             'factories' => array(
                 'ZfSimpleMigrations\Model\MigrationVersionTable' => function (ServiceLocatorInterface $serviceLocator) {
-                    /** @var $tableGateway TableGateway */
-                    $tableGateway = $serviceLocator->get('ZfSimpleMigrationsVersionTableGateway');
-                    $table = new Model\MigrationVersionTable($tableGateway);
-                    return $table;
-                },
+                        /** @var $tableGateway TableGateway */
+                        $tableGateway = $serviceLocator->get('ZfSimpleMigrationsVersionTableGateway');
+                        $table = new Model\MigrationVersionTable($tableGateway);
+                        return $table;
+                    },
                 'ZfSimpleMigrationsVersionTableGateway' => function (ServiceLocatorInterface $serviceLocator) {
-                    /** @var $dbAdapter \Zend\Db\Adapter\Adapter */
-                    $dbAdapter = $serviceLocator->get('Zend\Db\Adapter\Adapter');
-                    $resultSetPrototype = new ResultSet();
-                    $resultSetPrototype->setArrayObjectPrototype(new Model\MigrationVersion());
-                    return new TableGateway(Model\MigrationVersion::TABLE_NAME, $dbAdapter, null, $resultSetPrototype);
-                },
+                        /** @var $dbAdapter \Zend\Db\Adapter\Adapter */
+                        $dbAdapter = $serviceLocator->get('Zend\Db\Adapter\Adapter');
+                        $resultSetPrototype = new ResultSet();
+                        $resultSetPrototype->setArrayObjectPrototype(new Model\MigrationVersion());
+                        return new TableGateway(Model\MigrationVersion::TABLE_NAME, $dbAdapter, null, $resultSetPrototype);
+                    },
             ),
         );
     }
@@ -72,21 +72,30 @@ class Module implements
     public function getConsoleUsage(Console $console)
     {
         return array(
-            'Simple Migrations',
+            'Get last applied migration version',
+            'migration version' => '',
 
-            'migration version' => 'Get last applied migration version',
-
-            'migration list [--all]' => 'List available migrations',
+            'List available migrations',
+            'migration list [--all]' => '',
             array('--all', 'Include applied migrations'),
 
-            'migration apply [<version>] [--force]' => 'Execute migration',
+            'Generate new migration skeleton class',
+            'migration generate' => '',
+
+            'Execute migration',
+            'migration apply [<version>] [--force] [--down] [--fake]' => '',
             array(
                 '--force',
                 'Force apply migration even if it\'s older than the last migrated. Works only with <version> explicitly set.'
             ),
-            array('--down', 'Force apply down migration. Works only with --force flag set.'),
-
-            'migration generate' => 'Generate new migration skeleton class'
+            array(
+                '--down',
+                'Force apply down migration. Works only with --force flag set.'
+            ),
+            array(
+                '--fake',
+                'Fake apply or apply down migration. Adds/removes migration to the list of applied w/out really applying it. Works only with <version> explicitly set.'
+            ),
         );
     }
 }

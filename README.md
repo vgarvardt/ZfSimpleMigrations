@@ -17,7 +17,7 @@ php composer.phar update
 
 * `migration version` - show last applied migration
 * `migration list [--all]` - list available migrations (`all` includes applied migrations)
-* `migration apply [<version>] [--force] [--down]` - apply or rollback migration
+* `migration apply [<version>] [--force] [--down] [--fake]` - apply or rollback migration
 * `migration generate` - generate migration skeleton class
 
 Migration classes are stored in `/path/to/project/migrations/` dir by default.

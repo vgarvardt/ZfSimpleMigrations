@@ -93,9 +93,10 @@ class Migration
      * @param int $version target migration version, if not set all not applied available migrations will be applied
      * @param bool $force force apply migration
      * @param bool $down rollback migration
+     * @param bool $fake
      * @throws MigrationException
      */
-    public function migrate($version = null, $force = false, $down = false)
+    public function migrate($version = null, $force = false, $down = false, $fake = false)
     {
         $migrations = $this->getMigrationClasses($force);
 
@@ -116,7 +117,7 @@ class Migration
                         // if existing migration is forced to apply - delete its information from migrated
                         // to avoid duplicate key error
                         if (!$down) $this->migrationVersionTable->delete($migration['version']);
-                        $this->applyMigration($migration, $down);
+                        $this->applyMigration($migration, $down, $fake);
                         break;
                     }
                 }
@@ -125,7 +126,7 @@ class Migration
                 foreach ($migrations as $migration) {
                     if ($migration['version'] > $currentMigrationVersion) {
                         if (is_null($version) || (!is_null($version) && $version >= $migration['version'])) {
-                            $this->applyMigration($migration);
+                            $this->applyMigration($migration, false, $fake);
                         }
                     }
                 }
@@ -134,7 +135,7 @@ class Migration
                 $migrationsByDesc = $this->sortMigrationsByVersionDesc($migrations);
                 foreach ($migrationsByDesc as $migration) {
                     if ($migration['version'] > $version && $migration['version'] <= $currentMigrationVersion) {
-                        $this->applyMigration($migration, true);
+                        $this->applyMigration($migration, true, $fake);
                     }
                 }
             }
@@ -221,7 +222,7 @@ class Migration
 
                     if (!class_exists($className))
                         /** @noinspection PhpIncludeInspection */
-                    require_once $this->migrationsDir . '/' . $item->getFilename();
+                        require_once $this->migrationsDir . '/' . $item->getFilename();
 
                     if (class_exists($className)) {
                         $reflectionClass = new \ReflectionClass($className);
@@ -251,17 +252,20 @@ class Migration
         return $classes;
     }
 
-    protected function applyMigration(array $migration, $down = false)
+    protected function applyMigration(array $migration, $down = false, $fake = false)
     {
         /** @var $migrationObject AbstractMigration */
         $migrationObject = new $migration['class']($this->metadata, $this->outputWriter);
 
-        $this->outputWriter->writeLine(sprintf("Execute migration class %s %s", $migration['class'], $down ? 'down' : 'up'));
+        $this->outputWriter->writeLine(sprintf("%sExecute migration class %s %s",
+            $fake ? '[FAKE] ' : '', $migration['class'], $down ? 'down' : 'up'));
 
-        $sqlList = $down ? $migrationObject->getDownSql() : $migrationObject->getUpSql();
-        foreach ($sqlList as $sql) {
-            $this->outputWriter->writeLine("Execute query:\n\n" . $sql);
-            $this->connection->execute($sql);
+        if (!$fake) {
+            $sqlList = $down ? $migrationObject->getDownSql() : $migrationObject->getUpSql();
+            foreach ($sqlList as $sql) {
+                $this->outputWriter->writeLine("Execute query:\n\n" . $sql);
+                $this->connection->execute($sql);
+            }
         }
 
         if ($down) {
