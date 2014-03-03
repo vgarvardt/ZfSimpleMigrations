@@ -109,46 +109,33 @@ class Migration
             throw new MigrationException(sprintf('Migration version %s is current version!', $version));
         }
 
-        $this->connection->beginTransaction();
-        try {
-            if ($version && $force) {
-                foreach ($migrations as $migration) {
-                    if ($migration['version'] == $version) {
-                        // if existing migration is forced to apply - delete its information from migrated
-                        // to avoid duplicate key error
-                        if (!$down) $this->migrationVersionTable->delete($migration['version']);
-                        $this->applyMigration($migration, $down, $fake);
-                        break;
-                    }
+        if ($version && $force) {
+            foreach ($migrations as $migration) {
+                if ($migration['version'] == $version) {
+                    // if existing migration is forced to apply - delete its information from migrated
+                    // to avoid duplicate key error
+                    if (!$down) $this->migrationVersionTable->delete($migration['version']);
+                    $this->applyMigration($migration, $down, $fake);
+                    break;
                 }
-                // target migration version not set or target version is greater than last applied migration -> apply migrations
-            } elseif (is_null($version) || (!is_null($version) && $version > $currentMigrationVersion)) {
-                foreach ($migrations as $migration) {
-                    if ($migration['version'] > $currentMigrationVersion) {
-                        if (is_null($version) || (!is_null($version) && $version >= $migration['version'])) {
-                            $this->applyMigration($migration, false, $fake);
-                        }
-                    }
-                }
-                // target migration version is set -> rollback migration
-            } elseif (!is_null($version) && $version < $currentMigrationVersion) {
-                $migrationsByDesc = $this->sortMigrationsByVersionDesc($migrations);
-                foreach ($migrationsByDesc as $migration) {
-                    if ($migration['version'] > $version && $migration['version'] <= $currentMigrationVersion) {
-                        $this->applyMigration($migration, true, $fake);
+            }
+            // target migration version not set or target version is greater than last applied migration -> apply migrations
+        } elseif (is_null($version) || (!is_null($version) && $version > $currentMigrationVersion)) {
+            foreach ($migrations as $migration) {
+                if ($migration['version'] > $currentMigrationVersion) {
+                    if (is_null($version) || (!is_null($version) && $version >= $migration['version'])) {
+                        $this->applyMigration($migration, false, $fake);
                     }
                 }
             }
-
-            $this->connection->commit();
-        } catch (InvalidQueryException $e) {
-            $this->connection->rollback();
-            $msg = sprintf('%s: "%s"; File: %s; Line #%d', $e->getMessage(), $e->getPrevious()->getMessage(), $e->getFile(), $e->getLine());
-            throw new MigrationException($msg);
-        } catch (\Exception $e) {
-            $this->connection->rollback();
-            $msg = sprintf('%s; File: %s; Line #%d', $e->getMessage(), $e->getFile(), $e->getLine());
-            throw new MigrationException($msg);
+            // target migration version is set -> rollback migration
+        } elseif (!is_null($version) && $version < $currentMigrationVersion) {
+            $migrationsByDesc = $this->sortMigrationsByVersionDesc($migrations);
+            foreach ($migrationsByDesc as $migration) {
+                if ($migration['version'] > $version && $migration['version'] <= $currentMigrationVersion) {
+                    $this->applyMigration($migration, true, $fake);
+                }
+            }
         }
     }
 
@@ -254,24 +241,37 @@ class Migration
 
     protected function applyMigration(array $migration, $down = false, $fake = false)
     {
-        /** @var $migrationObject AbstractMigration */
-        $migrationObject = new $migration['class']($this->metadata, $this->outputWriter);
+        $this->connection->beginTransaction();
 
-        $this->outputWriter->writeLine(sprintf("%sExecute migration class %s %s",
-            $fake ? '[FAKE] ' : '', $migration['class'], $down ? 'down' : 'up'));
+        try {
+            /** @var $migrationObject AbstractMigration */
+            $migrationObject = new $migration['class']($this->metadata, $this->outputWriter);
 
-        if (!$fake) {
-            $sqlList = $down ? $migrationObject->getDownSql() : $migrationObject->getUpSql();
-            foreach ($sqlList as $sql) {
-                $this->outputWriter->writeLine("Execute query:\n\n" . $sql);
-                $this->connection->execute($sql);
+            $this->outputWriter->writeLine(sprintf("%sExecute migration class %s %s",
+                $fake ? '[FAKE] ' : '', $migration['class'], $down ? 'down' : 'up'));
+
+            if (!$fake) {
+                $sqlList = $down ? $migrationObject->getDownSql() : $migrationObject->getUpSql();
+                foreach ($sqlList as $sql) {
+                    $this->outputWriter->writeLine("Execute query:\n\n" . $sql);
+                    $this->connection->execute($sql);
+                }
             }
-        }
 
-        if ($down) {
-            $this->migrationVersionTable->delete($migration['version']);
-        } else {
-            $this->migrationVersionTable->save($migration['version']);
+            if ($down) {
+                $this->migrationVersionTable->delete($migration['version']);
+            } else {
+                $this->migrationVersionTable->save($migration['version']);
+            }
+            $this->connection->commit();
+        } catch (InvalidQueryException $e) {
+            $this->connection->rollback();
+            $msg = sprintf('%s: "%s"; File: %s; Line #%d', $e->getMessage(), $e->getPrevious()->getMessage(), $e->getFile(), $e->getLine());
+            throw new MigrationException($msg);
+        } catch (\Exception $e) {
+            $this->connection->rollback();
+            $msg = sprintf('%s; File: %s; Line #%d', $e->getMessage(), $e->getFile(), $e->getLine());
+            throw new MigrationException($msg);
         }
     }
 }
