@@ -10,6 +10,7 @@ Simple Migrations for Zend Framework 2. Project originally based on [ZendDbMigra
 php composer.phar require vgarvardt/zf-simple-migrations:dev-master
 php composer.phar update
 ```
+add `ZfSimpleMigrations` to the `modules` array in application.config.php
 
 ## Usage
 
