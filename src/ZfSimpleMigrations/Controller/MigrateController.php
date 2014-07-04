@@ -86,12 +86,8 @@ class MigrateController extends AbstractActionController
             return "No migrations to apply.\n";
         }
 
-        try {
-            $this->getMigration()->migrate($version, $force, $down, $fake);
-            return "Migrations applied!\n";
-        } catch (MigrationException $e) {
-            return get_class($e) . "\n" . $e->getMessage() . "\n";
-        }
+        $this->getMigration()->migrate($version, $force, $down, $fake);
+        return "Migrations applied!\n";
     }
 
     /**
