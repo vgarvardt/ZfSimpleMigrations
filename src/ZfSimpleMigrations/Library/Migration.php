@@ -8,6 +8,8 @@ use Zend\Db\Adapter\Exception\InvalidQueryException;
 use Zend\Db\Metadata\Metadata;
 use Zend\Db\Sql\Ddl;
 use Zend\Db\Sql\Sql;
+use Zend\ServiceManager\ServiceLocatorAwareInterface;
+use Zend\ServiceManager\ServiceLocatorInterface;
 use ZfSimpleMigrations\Library\OutputWriter;
 use ZfSimpleMigrations\Model\MigrationVersion;
 use ZfSimpleMigrations\Model\MigrationVersionTable;
@@ -27,7 +29,7 @@ class Migration
     protected $metadata;
     protected $migrationVersionTable;
     protected $outputWriter;
-
+    protected $services;
     /**
      * @param \Zend\Db\Adapter\Adapter $adapter
      * @param array $config
@@ -247,6 +249,19 @@ class Migration
             /** @var $migrationObject AbstractMigration */
             $migrationObject = new $migration['class']($this->metadata, $this->outputWriter);
 
+            if ($migrationObject instanceof ServiceLocatorAwareInterface) {
+                if (is_null($this->services)) {
+                    throw new \RuntimeException(
+                        sprintf(
+                            'Migration class %s requires a ServiceLocator, but it is no instance available.',
+                            get_class($migrationObject)
+                        )
+                    );
+                }
+
+                $migrationObject->setServiceLocator($this->services);
+            }
+
             $this->outputWriter->writeLine(sprintf("%sExecute migration class %s %s",
                 $fake ? '[FAKE] ' : '', $migration['class'], $down ? 'down' : 'up'));
 
@@ -273,5 +288,21 @@ class Migration
             $msg = sprintf('%s; File: %s; Line #%d', $e->getMessage(), $e->getFile(), $e->getLine());
             throw new MigrationException($msg);
         }
+    }
+
+    /**
+     * @param ServiceLocatorInterface $services
+     */
+    public function setServiceLocator(ServiceLocatorInterface $services)
+    {
+        $this->services = $services;
+    }
+
+    /**
+     * @return ServiceLocatorInterface
+     */
+    public function getServiceLocator()
+    {
+        return $this->services;
     }
 }
