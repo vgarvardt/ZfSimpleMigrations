@@ -17,7 +17,7 @@ use ZfSimpleMigrations\Model\MigrationVersionTable;
 /**
  * Main migration logic
  */
-class Migration
+class Migration implements ServiceLocatorAwareInterface
 {
     protected $migrationsDir;
     protected $migrationsNamespace;
@@ -29,7 +29,11 @@ class Migration
     protected $metadata;
     protected $migrationVersionTable;
     protected $outputWriter;
-    protected $services;
+
+    /**
+     * @var ServiceLocatorInterface
+     */
+    protected $serviceLocator;
     /**
      * @param \Zend\Db\Adapter\Adapter $adapter
      * @param array $config
@@ -250,7 +254,7 @@ class Migration
             $migrationObject = new $migration['class']($this->metadata, $this->outputWriter);
 
             if ($migrationObject instanceof ServiceLocatorAwareInterface) {
-                if (is_null($this->services)) {
+                if (is_null($this->serviceLocator)) {
                     throw new \RuntimeException(
                         sprintf(
                             'Migration class %s requires a ServiceLocator, but it is no instance available.',
@@ -259,7 +263,7 @@ class Migration
                     );
                 }
 
-                $migrationObject->setServiceLocator($this->services);
+                $migrationObject->setServiceLocator($this->serviceLocator);
             }
 
             $this->outputWriter->writeLine(sprintf("%sExecute migration class %s %s",
@@ -291,18 +295,25 @@ class Migration
     }
 
     /**
-     * @param ServiceLocatorInterface $services
+     * Set service locator
+     *
+     * @param ServiceLocatorInterface $serviceLocator
+     * @return mixed
      */
-    public function setServiceLocator(ServiceLocatorInterface $services)
+    public function setServiceLocator(ServiceLocatorInterface $serviceLocator)
     {
-        $this->services = $services;
+        $this->serviceLocator = $serviceLocator;
+
+        return $this;
     }
 
     /**
+     * Get service locator
+     *
      * @return ServiceLocatorInterface
      */
     public function getServiceLocator()
     {
-        return $this->services;
+        return $this->serviceLocator;
     }
 }
