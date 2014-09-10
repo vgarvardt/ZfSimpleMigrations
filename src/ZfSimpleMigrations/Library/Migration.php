@@ -34,6 +34,7 @@ class Migration implements ServiceLocatorAwareInterface
      * @var ServiceLocatorInterface
      */
     protected $serviceLocator;
+
     /**
      * @param \Zend\Db\Adapter\Adapter $adapter
      * @param array $config
