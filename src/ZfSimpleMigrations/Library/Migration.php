@@ -8,6 +8,8 @@ use Zend\Db\Adapter\Exception\InvalidQueryException;
 use Zend\Db\Metadata\Metadata;
 use Zend\Db\Sql\Ddl;
 use Zend\Db\Sql\Sql;
+use Zend\ServiceManager\ServiceLocatorAwareInterface;
+use Zend\ServiceManager\ServiceLocatorInterface;
 use ZfSimpleMigrations\Library\OutputWriter;
 use ZfSimpleMigrations\Model\MigrationVersion;
 use ZfSimpleMigrations\Model\MigrationVersionTable;
@@ -15,7 +17,7 @@ use ZfSimpleMigrations\Model\MigrationVersionTable;
 /**
  * Main migration logic
  */
-class Migration
+class Migration implements ServiceLocatorAwareInterface
 {
     protected $migrationsDir;
     protected $migrationsNamespace;
@@ -28,6 +30,10 @@ class Migration
     protected $migrationVersionTable;
     protected $outputWriter;
 
+    /**
+     * @var ServiceLocatorInterface
+     */
+    protected $serviceLocator;
     /**
      * @param \Zend\Db\Adapter\Adapter $adapter
      * @param array $config
@@ -247,6 +253,19 @@ class Migration
             /** @var $migrationObject AbstractMigration */
             $migrationObject = new $migration['class']($this->metadata, $this->outputWriter);
 
+            if ($migrationObject instanceof ServiceLocatorAwareInterface) {
+                if (is_null($this->serviceLocator)) {
+                    throw new \RuntimeException(
+                        sprintf(
+                            'Migration class %s requires a ServiceLocator, but it is no instance available.',
+                            get_class($migrationObject)
+                        )
+                    );
+                }
+
+                $migrationObject->setServiceLocator($this->serviceLocator);
+            }
+
             $this->outputWriter->writeLine(sprintf("%sExecute migration class %s %s",
                 $fake ? '[FAKE] ' : '', $migration['class'], $down ? 'down' : 'up'));
 
@@ -273,5 +292,28 @@ class Migration
             $msg = sprintf('%s; File: %s; Line #%d', $e->getMessage(), $e->getFile(), $e->getLine());
             throw new MigrationException($msg);
         }
+    }
+
+    /**
+     * Set service locator
+     *
+     * @param ServiceLocatorInterface $serviceLocator
+     * @return mixed
+     */
+    public function setServiceLocator(ServiceLocatorInterface $serviceLocator)
+    {
+        $this->serviceLocator = $serviceLocator;
+
+        return $this;
+    }
+
+    /**
+     * Get service locator
+     *
+     * @return ServiceLocatorInterface
+     */
+    public function getServiceLocator()
+    {
+        return $this->serviceLocator;
     }
 }

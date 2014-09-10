@@ -130,6 +130,8 @@ class MigrateController extends AbstractActionController
             }
 
             $this->migration = new Migration($adapter, $config['migrations'], $this->getMigrationVersionTable(), $output);
+
+            $this->migration->setServiceLocator($this->getServiceLocator());
         }
         return $this->migration;
     }

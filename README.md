@@ -50,3 +50,36 @@ class Version20130403165433 extends AbstractMigration
     }
 }
 ```
+
+### Accessing ServiceLocator In Migration Class
+
+By implementing the `Zend\ServiceManager\ServiceLocatorAwareInterface` in your migration class you get access to the
+ServiceLocator used in the application.
+
+``` php
+<?php
+
+namespace ZfSimpleMigrations\Migrations;
+
+use ZfSimpleMigrations\Library\AbstractMigration;
+use Zend\Db\Metadata\MetadataInterface;
+use Zend\ServiceManager\ServiceLocatorAwareInterface;
+
+class Version20130403165433 extends AbstractMigration implements ServiceLocatorAwareInterface
+{
+    public static $description = "Migration description";
+
+    public function up(MetadataInterface $schema)
+    {
+         //$this->getServiceLocator()->get(/*Get service by alias*/);
+         //$this->addSql(/*Sql instruction*/);
+
+    }
+
+    public function down(MetadataInterface $schema)
+    {
+        //$this->getServiceLocator()->get(/*Get service by alias*/);
+        //$this->addSql(/*Sql instruction*/);
+    }
+}
+```
