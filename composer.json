@@ -1,5 +1,5 @@
 {
-    "name": "vgarvardt/zf-simple-migrations",
+    "name": "AdamiecRadek/zf-simple-migrations",
     "description": "Module for database migrations management.",
     "type": "library",
     "license": "BSD-3-Clause",
