@@ -26,7 +26,6 @@ class Module implements
      */
     public function onBootstrap(EventInterface $e)
     {
-        $e->getApplication()->getServiceManager()->get('translator');
         $eventManager = $e->getApplication()->getEventManager();
         $moduleRouteListener = new ModuleRouteListener();
         $moduleRouteListener->attach($eventManager);
