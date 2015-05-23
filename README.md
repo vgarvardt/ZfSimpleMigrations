@@ -16,10 +16,10 @@ add `ZfSimpleMigrations` to the `modules` array in application.config.php
 
 ### Available commands
 
-* `migration version` - show last applied migration
-* `migration list [--all]` - list available migrations (`all` includes applied migrations)
-* `migration apply [<version>] [--force] [--down] [--fake]` - apply or rollback migration
-* `migration generate` - generate migration skeleton class
+* `migration version [<name>]` - show last applied migration (`name` specifies a configured migration)
+* `migration list [<name>] [--all]` - list available migrations (`all` includes applied migrations)
+* `migration apply [<name>] [<version>] [--force] [--down] [--fake]` - apply or rollback migration
+* `migration generate [<name>]` - generate migration skeleton class
 
 Migration classes are stored in `/path/to/project/migrations/` dir by default.
 
@@ -108,4 +108,47 @@ class Version20130403165433 extends AbstractMigration
         return $this->serviceLocator;
     }
 }
+```
+
+## Configuration
+  
+### User Configuration
+
+The top-level key used to configure this module is `migrations`. 
+
+#### Migration Configurations: Migrations Name
+
+Each key under `migrations` is a migrations configuration, and the value is an array with one or more of
+the following keys.
+
+##### Sub-key: `dir`
+
+The path to the directory where migration files are stored. Defaults to `./migrations` in the project root dir.
+
+##### Sub-key: `namespace` 
+
+The class namespace that migration classes will be generated with. Defaults to `ZfSimpleMigrations\Migrations`.
+
+##### Sub-key: `show_log` (optional)
+
+Flag to log output of the migration. Defaults to `true`.
+
+##### Sub-key: `adapter` (optional)
+
+The service alias that will be used to fetch a `Zend\Db\Adapter\Adapter` from the service manager.
+
+#### User configuration example:
+
+```php
+'migrations' => array(
+    'default' => array(
+            'dir' => dirname(__FILE__) . '/../../../../migrations-app',
+            'namespace' => 'App\Migrations',    
+    ),
+    'albums' => array(
+            'dir' => dirname(__FILE__) . '/../../../../migrations-albums',
+            'namespace' => 'Albums\Migrations',
+            'adapter' => 'AlbumDb'    
+    ),
+),
 ```

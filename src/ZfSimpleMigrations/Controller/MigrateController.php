@@ -18,6 +18,26 @@ class MigrateController extends AbstractActionController
      * @var \ZfSimpleMigrations\Library\Migration
      */
     protected $migration;
+    /** @var  MigrationSkeletonGenerator */
+    protected $skeleton_generator;
+
+    /**
+     * @return MigrationSkeletonGenerator
+     */
+    public function getSkeletonGenerator()
+    {
+        return $this->skeleton_generator;
+    }
+
+    /**
+     * @param MigrationSkeletonGenerator $skeleton_generator
+     * @return self
+     */
+    public function setSkeletonGenerator($skeleton_generator)
+    {
+        $this->skeleton_generator = $skeleton_generator;
+        return $this;
+    }
 
     public function onDispatch(MvcEvent $e)
     {
@@ -75,6 +95,7 @@ class MigrateController extends AbstractActionController
         $force = $this->getRequest()->getParam('force');
         $down = $this->getRequest()->getParam('down');
         $fake = $this->getRequest()->getParam('fake');
+        $name = $this->getRequest()->getParam('name');
 
         if (is_null($version) && $force) {
             return "Can't force migration apply without migration version explicitly set.";
@@ -95,44 +116,28 @@ class MigrateController extends AbstractActionController
      */
     public function generateSkeletonAction()
     {
-        $config = $this->getServiceLocator()->get('Config');
-
-        $generator = new MigrationSkeletonGenerator($config['migrations']['dir'], $config['migrations']['namespace']);
-        $classPath = $generator->generate();
+        $classPath = $this->getSkeletonGenerator()->generate();
 
         return sprintf("Generated skeleton class @ %s\n", realpath($classPath));
     }
 
     /**
-     * @return \ZfSimpleMigrations\Model\MigrationVersionTable
+     * @return Migration
      */
-    protected function getMigrationVersionTable()
+    public function getMigration()
     {
-        return $this->getServiceLocator()->get('ZfSimpleMigrations\Model\MigrationVersionTable');
+        return $this->migration;
     }
 
     /**
-     * @return Migration
+     * @param Migration $migration
+     * @return self
      */
-    protected function getMigration()
+    public function setMigration(Migration $migration)
     {
-        if (!$this->migration) {
-            /** @var $adapter \Zend\Db\Adapter\Adapter */
-            $adapter = $this->getServiceLocator()->get('Zend\Db\Adapter\Adapter');
-            $config = $this->getServiceLocator()->get('Configuration');
-
-            $output = null;
-            if ($config['migrations']['show_log']) {
-                $console = $this->getServiceLocator()->get('console');
-                $output = new OutputWriter(function ($message) use ($console) {
-                    $console->write($message . "\n");
-                });
-            }
-
-            $this->migration = new Migration($adapter, $config['migrations'], $this->getMigrationVersionTable(), $output);
-
-            $this->migration->setServiceLocator($this->getServiceLocator());
-        }
-        return $this->migration;
+        $this->migration = $migration;
+        return $this;
     }
+
+
 }

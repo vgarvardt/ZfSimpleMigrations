@@ -50,20 +50,10 @@ class Module implements
     public function getServiceConfig()
     {
         return array(
-            'factories' => array(
-                'ZfSimpleMigrations\Model\MigrationVersionTable' => function (ServiceLocatorInterface $serviceLocator) {
-                        /** @var $tableGateway TableGateway */
-                        $tableGateway = $serviceLocator->get('ZfSimpleMigrationsVersionTableGateway');
-                        $table = new Model\MigrationVersionTable($tableGateway);
-                        return $table;
-                    },
-                'ZfSimpleMigrationsVersionTableGateway' => function (ServiceLocatorInterface $serviceLocator) {
-                        /** @var $dbAdapter \Zend\Db\Adapter\Adapter */
-                        $dbAdapter = $serviceLocator->get('Zend\Db\Adapter\Adapter');
-                        $resultSetPrototype = new ResultSet();
-                        $resultSetPrototype->setArrayObjectPrototype(new Model\MigrationVersion());
-                        return new TableGateway(Model\MigrationVersion::TABLE_NAME, $dbAdapter, null, $resultSetPrototype);
-                    },
+            'abstract_factories' => array(
+                'ZfSimpleMigrations\Model\MigrationVersionTableAbstractFactory',
+                'ZfSimpleMigrations\Model\MigrationVersionTableGatewayAbstractFactory',
+                'ZfSimpleMigrations\Library\MigrationSkeletonGeneratorAbstractFactory'
             ),
         );
     }
@@ -72,17 +62,21 @@ class Module implements
     {
         return array(
             'Get last applied migration version',
-            'migration version' => '',
+            'migration version [<name>]' => '',
+            array('[<name>]', 'specify which configured migrations to run, defaults to `default`'),
 
             'List available migrations',
-            'migration list [--all]' => '',
+            'migration list [<name>] [--all]' => '',
             array('--all', 'Include applied migrations'),
+            array('[<name>]', 'specify which configured migrations to run, defaults to `default`'),
 
             'Generate new migration skeleton class',
-            'migration generate' => '',
+            'migration generate [<name>]' => '',
+            array('[<name>]', 'specify which configured migrations to run, defaults to `default`'),
 
             'Execute migration',
-            'migration apply [<version>] [--force] [--down] [--fake]' => '',
+            'migration apply [<name>] [<version>] [--force] [--down] [--fake]' => '',
+            array('[<name>]', 'specify which configured migrations to run, defaults to `default`'),
             array(
                 '--force',
                 'Force apply migration even if it\'s older than the last migrated. Works only with <version> explicitly set.'

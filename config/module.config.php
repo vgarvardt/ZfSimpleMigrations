@@ -2,9 +2,12 @@
 
 return array(
     'migrations' => array(
-        'dir' => dirname(__FILE__) . '/../../../../migrations',
-        'namespace' => 'ZfSimpleMigrations\Migrations',
-        'show_log' => true
+        'default' => array(
+            'dir' => dirname(__FILE__) . '/../../../../migrations',
+            'namespace' => 'ZfSimpleMigrations\Migrations',
+            'show_log' => true,
+            'adapter' => 'Zend\Db\Adapter\Adapter'
+        ),
     ),
     'console' => array(
         'router' => array(
@@ -12,40 +15,44 @@ return array(
                 'migration-version' => array(
                     'type' => 'simple',
                     'options' => array(
-                        'route' => 'migration version [--env=]',
+                        'route' => 'migration version [<name>] [--env=]',
                         'defaults' => array(
                             'controller' => 'ZfSimpleMigrations\Controller\Migrate',
-                            'action' => 'version'
+                            'action' => 'version',
+                            'name' => 'default'
                         )
                     )
                 ),
                 'migration-list' => array(
                     'type' => 'simple',
                     'options' => array(
-                        'route' => 'migration list [--env=] [--all]',
+                        'route' => 'migration list [<name>] [--env=] [--all]',
                         'defaults' => array(
                             'controller' => 'ZfSimpleMigrations\Controller\Migrate',
-                            'action' => 'list'
+                            'action' => 'list',
+                            'name' => 'default'
                         )
                     )
                 ),
                 'migration-apply' => array(
                     'type' => 'simple',
                     'options' => array(
-                        'route' => 'migration apply [<version>] [--env=] [--force] [--down] [--fake]',
+                        'route' => 'migration apply [<name>] [<version>] [--env=] [--force] [--down] [--fake]',
                         'defaults' => array(
                             'controller' => 'ZfSimpleMigrations\Controller\Migrate',
-                            'action' => 'apply'
+                            'action' => 'apply',
+                            'name' => 'default'
                         )
                     )
                 ),
                 'migration-generate' => array(
                     'type' => 'simple',
                     'options' => array(
-                        'route' => 'migration generate [--env=]',
+                        'route' => 'migration generate [<name>] [--env=]',
                         'defaults' => array(
                             'controller' => 'ZfSimpleMigrations\Controller\Migrate',
-                            'action' => 'generateSkeleton'
+                            'action' => 'generateSkeleton',
+                            'name' => 'default'
                         )
                     )
                 )
