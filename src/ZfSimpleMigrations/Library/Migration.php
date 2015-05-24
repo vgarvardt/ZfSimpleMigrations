@@ -3,6 +3,7 @@
 namespace ZfSimpleMigrations\Library;
 
 use Zend\Db\Adapter\Adapter;
+use Zend\Db\Adapter\AdapterAwareInterface;
 use Zend\Db\Adapter\Driver\Pdo\Pdo;
 use Zend\Db\Adapter\Exception\InvalidQueryException;
 use Zend\Db\Metadata\Metadata;
@@ -258,13 +259,27 @@ class Migration implements ServiceLocatorAwareInterface
                 if (is_null($this->serviceLocator)) {
                     throw new \RuntimeException(
                         sprintf(
-                            'Migration class %s requires a ServiceLocator, but it is no instance available.',
+                            'Migration class %s requires a ServiceLocator, but there is no instance available.',
                             get_class($migrationObject)
                         )
                     );
                 }
 
                 $migrationObject->setServiceLocator($this->serviceLocator);
+            }
+
+            if ($migrationObject instanceof AdapterAwareInterface)
+            {
+                if (is_null($this->adapter)) {
+                    throw new \RuntimeException(
+                        sprintf(
+                            'Migration class %s requires an Adapter, but there is no instance available.',
+                            get_class($migrationObject)
+                        )
+                    );
+                }
+
+                $migrationObject->setDbAdapter($this->adapter);
             }
 
             $this->outputWriter->writeLine(sprintf("%sExecute migration class %s %s",

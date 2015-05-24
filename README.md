@@ -110,6 +110,50 @@ class Version20130403165433 extends AbstractMigration
 }
 ```
 
+### Accessing Zend Db Adapter In Migration Class
+
+By implementing the `Zend\Db\Adapter\AdapterAwareInterface` in your migration class you get access to the
+Db Adapter configured for the migration.
+
+```php
+<?php
+
+namespace ZfSimpleMigrations\Migrations;
+
+use Zend\Db\Adapter\AdapterAwareInterface;
+use Zend\Db\Adapter\AdapterAwareTrait;
+use Zend\Db\Sql\Ddl\Column\Integer;
+use Zend\Db\Sql\Ddl\Column\Varchar;
+use Zend\Db\Sql\Ddl\Constraint\PrimaryKey;
+use Zend\Db\Sql\Ddl\CreateTable;
+use Zend\Db\Sql\Ddl\DropTable;
+use ZfSimpleMigrations\Library\AbstractMigration;
+use Zend\Db\Metadata\MetadataInterface;
+
+class Version20150524162247 extends AbstractMigration implements AdapterAwareInterface
+{
+    use AdapterAwareTrait;
+
+    public static $description = "Migration description";
+
+    public function up(MetadataInterface $schema)
+    {
+        $table = new CreateTable('my_table');
+        $table->addColumn(new Integer('id', false));
+        $table->addConstraint(new PrimaryKey('id'));
+        $table->addColumn(new Varchar('my_column', 64));
+        $this->addSql($table->getSqlString($this->adapter->getPlatform()));
+    }
+
+    public function down(MetadataInterface $schema)
+    {
+        $drop = new DropTable('my_table');
+        $this->addSql($drop->getSqlString($this->adapter->getPlatform()));
+    }
+}
+```
+
+
 ## Configuration
   
 ### User Configuration
