@@ -11,7 +11,7 @@ use ZfSimpleMigrations\Model\MigrationVersionTable;
 
 class MigrationAbstractFactory implements AbstractFactoryInterface
 {
-    const FACTORY_PATTERN = '/migrations\.migration\.(.*)+/';
+    const FACTORY_PATTERN = '/migrations\.migration\.(.*)/';
     /**
      * Determine if we can create a service with name
      *
@@ -41,9 +41,13 @@ class MigrationAbstractFactory implements AbstractFactoryInterface
         }
 
         $config = $serviceLocator->get('Config');
+
+        preg_match(self::FACTORY_PATTERN, $name, $matches);
+        $name = $matches[1];
+
         if(!isset($config['migrations'][$name]))
         {
-            throw new RuntimeException(sprintf("`%s` does not exist in migrations configuration"));
+            throw new RuntimeException(sprintf("`%s` does not exist in migrations configuration", $name));
         }
 
         $migration_config = $config['migrations'][$name];
@@ -63,7 +67,7 @@ class MigrationAbstractFactory implements AbstractFactoryInterface
         }
 
         /** @var MigrationVersionTable $version_table */
-        $version_table = $serviceLocator->get('migrations.version-table.' . $adapter_name);
+        $version_table = $serviceLocator->get('migrations.versiontable.' . $adapter_name);
 
         $migration = new Migration($adapter, $migration_config, $version_table, $output);
 

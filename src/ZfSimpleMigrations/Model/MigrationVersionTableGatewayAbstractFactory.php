@@ -11,7 +11,7 @@ use Zend\ServiceManager\ServiceLocatorInterface;
 
 class MigrationVersionTableGatewayAbstractFactory implements AbstractFactoryInterface
 {
-    const FACTORY_PATTERN = '/migrations\.version-table-gateway\.(.*)+/';
+    const FACTORY_PATTERN = '/migrations\.versiontablegateway\.(.*)/';
     /**
      * Determine if we can create a service with name
      *
@@ -36,7 +36,7 @@ class MigrationVersionTableGatewayAbstractFactory implements AbstractFactoryInte
     public function createServiceWithName(ServiceLocatorInterface $serviceLocator, $name, $requestedName)
     {
         preg_match(self::FACTORY_PATTERN, $name, $matches);
-        $adapter_name = $matches[0];
+        $adapter_name = $matches[1];
 
         /** @var $dbAdapter \Zend\Db\Adapter\Adapter */
         $dbAdapter = $serviceLocator->get($adapter_name);

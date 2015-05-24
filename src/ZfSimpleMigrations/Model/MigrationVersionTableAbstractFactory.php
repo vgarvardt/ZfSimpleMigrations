@@ -10,7 +10,7 @@ use Zend\ServiceManager\ServiceLocatorInterface;
 
 class MigrationVersionTableAbstractFactory implements AbstractFactoryInterface
 {
-    const FACTORY_PATTERN = '/migrations\.version-table\.(.*)+/';
+    const FACTORY_PATTERN = '/migrations\.versiontable\.(.*)/';
     /**
      * Determine if we can create a service with name
      *
@@ -35,10 +35,10 @@ class MigrationVersionTableAbstractFactory implements AbstractFactoryInterface
     public function createServiceWithName(ServiceLocatorInterface $serviceLocator, $name, $requestedName)
     {
         preg_match(self::FACTORY_PATTERN, $name, $matches);
-        $adapter_name = $matches[0];
+        $adapter_name = $matches[1];
 
         /** @var $tableGateway TableGateway */
-        $tableGateway = $serviceLocator->get('migrations.version-table-gateway.' . $adapter_name);
+        $tableGateway = $serviceLocator->get('migrations.versiontablegateway.' . $adapter_name);
         $table = new MigrationVersionTable($tableGateway);
         return $table;
     }

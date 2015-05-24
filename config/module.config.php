@@ -60,8 +60,8 @@ return array(
         )
     ),
     'controllers' => array(
-        'invokables' => array(
-            'ZfSimpleMigrations\Controller\Migrate' => 'ZfSimpleMigrations\Controller\MigrateController'
+        'factories' => array(
+            'ZfSimpleMigrations\Controller\Migrate' => 'ZfSimpleMigrations\\Controller\\MigrateControllerFactory'
         ),
     ),
     'view_manager' => array(

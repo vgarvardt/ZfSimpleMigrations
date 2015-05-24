@@ -5,6 +5,7 @@ namespace ZfSimpleMigrations\Controller;
 
 
 use Zend\Console\Request;
+use Zend\Mvc\Router\Console\RouteMatch;
 use Zend\ServiceManager\AbstractPluginManager;
 use Zend\ServiceManager\FactoryInterface;
 use Zend\ServiceManager\ServiceLocatorInterface;
@@ -27,10 +28,10 @@ class MigrateControllerFactory implements FactoryInterface
             $serviceLocator = $serviceLocator->getServiceLocator();
         }
 
-        /** @var Request $request */
-        $request = $serviceLocator->get('Request');
+        /** @var RouteMatch $routeMatch */
+        $routeMatch = $serviceLocator->get('Application')->getMvcEvent()->getRouteMatch();
 
-        $name = $request->getParam('name', 'default');
+        $name = $routeMatch->getParam('name', 'default');
 
         /** @var Migration $migration */
         $migration = $serviceLocator->get('migrations.migration.' . $name);
@@ -43,6 +44,5 @@ class MigrateControllerFactory implements FactoryInterface
         $controller->setSkeletonGenerator($generator);
 
         return $controller;
-
     }
 }

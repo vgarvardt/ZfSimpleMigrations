@@ -11,7 +11,7 @@ use Zend\ServiceManager\ServiceLocatorInterface;
 
 class MigrationSkeletonGeneratorAbstractFactory implements AbstractFactoryInterface
 {
-    const FACTORY_PATTERN = '/migrations\.skeleton-generator\.(.*)+/';
+    const FACTORY_PATTERN = '/migrations\.skeletongenerator\.(.*)/';
     /**
      * Determine if we can create a service with name
      *
@@ -41,7 +41,7 @@ class MigrationSkeletonGeneratorAbstractFactory implements AbstractFactoryInterf
         }
 
         preg_match(self::FACTORY_PATTERN, $name, $matches);
-        $migration_name = $matches[0];
+        $migration_name = $matches[1];
 
 
         $config = $serviceLocator->get('Config');

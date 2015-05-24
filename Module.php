@@ -51,9 +51,10 @@ class Module implements
     {
         return array(
             'abstract_factories' => array(
-                'ZfSimpleMigrations\Model\MigrationVersionTableAbstractFactory',
-                'ZfSimpleMigrations\Model\MigrationVersionTableGatewayAbstractFactory',
-                'ZfSimpleMigrations\Library\MigrationSkeletonGeneratorAbstractFactory'
+                'ZfSimpleMigrations\\Library\\MigrationAbstractFactory',
+                'ZfSimpleMigrations\\Model\\MigrationVersionTableAbstractFactory',
+                'ZfSimpleMigrations\\Model\\MigrationVersionTableGatewayAbstractFactory',
+                'ZfSimpleMigrations\\Library\\MigrationSkeletonGeneratorAbstractFactory'
             ),
         );
     }
