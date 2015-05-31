@@ -64,14 +64,14 @@ namespace ZfSimpleMigrations\Migrations;
 use ZfSimpleMigrations\Library\AbstractMigration;
 use Zend\Db\Metadata\MetadataInterface;
 use Zend\ServiceManager\ServiceLocatorAwareInterface;
+use Zend\ServiceManager\ServiceLocatorAwareTrait;
 
 class Version20130403165433 extends AbstractMigration
                             implements ServiceLocatorAwareInterface
 {
-    public static $description = "Migration description";
+    use ServiceLocatorAwareTrait;
 
-    /** @var ServiceLocatorInterface */
-    protected $serviceLocator;
+    public static $description = "Migration description";
 
     public function up(MetadataInterface $schema)
     {
@@ -84,28 +84,6 @@ class Version20130403165433 extends AbstractMigration
     {
         //$this->getServiceLocator()->get(/*Get service by alias*/);
         //$this->addSql(/*Sql instruction*/);
-    }
-
-    /**
-     * Set service locator
-     *
-     * @param ServiceLocatorInterface $serviceLocator
-     * @return mixed
-     */
-    public function setServiceLocator(ServiceLocatorInterface $serviceLocator)
-    {
-        $this->serviceLocator = $serviceLocator;
-        return $this;
-    }
-
-    /**
-     * Get service locator
-     *
-     * @return ServiceLocatorInterface
-     */
-    public function getServiceLocator()
-    {
-        return $this->serviceLocator;
     }
 }
 ```

@@ -35,8 +35,7 @@ class MigrationAbstractFactory implements AbstractFactoryInterface
      */
     public function createServiceWithName(ServiceLocatorInterface $serviceLocator, $name, $requestedName)
     {
-        if($serviceLocator instanceof AbstractPluginManager)
-        {
+        if ($serviceLocator instanceof AbstractPluginManager) {
             $serviceLocator = $serviceLocator->getServiceLocator();
         }
 
@@ -45,8 +44,7 @@ class MigrationAbstractFactory implements AbstractFactoryInterface
         preg_match(self::FACTORY_PATTERN, $name, $matches);
         $name = $matches[1];
 
-        if(!isset($config['migrations'][$name]))
-        {
+        if (! isset($config['migrations'][$name])) {
             throw new RuntimeException(sprintf("`%s` does not exist in migrations configuration", $name));
         }
 

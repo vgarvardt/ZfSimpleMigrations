@@ -76,7 +76,7 @@ class MigrateController extends AbstractActionController
     public function listAction()
     {
         $migrations = $this->getMigration()->getMigrationClasses($this->getRequest()->getParam('all'));
-        $list = array();
+        $list = [];
         foreach ($migrations as $m) {
             $list[] = sprintf("%s %s - %s", $m['applied'] ? '-' : '+', $m['version'], $m['description']);
         }

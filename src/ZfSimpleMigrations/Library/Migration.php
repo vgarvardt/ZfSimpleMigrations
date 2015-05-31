@@ -74,7 +74,7 @@ class Migration implements ServiceLocatorAwareInterface
     protected function checkCreateMigrationTable()
     {
         $table = new Ddl\CreateTable(MigrationVersion::TABLE_NAME);
-        $table->addColumn(new Ddl\Column\Integer('id', false, null, array('autoincrement' => true)));
+        $table->addColumn(new Ddl\Column\Integer('id', false, null, ['autoincrement' => true]));
         $table->addColumn(new Ddl\Column\BigInteger('version'));
         $table->addConstraint(new Ddl\Constraint\PrimaryKey('id'));
         $table->addConstraint(new Ddl\Constraint\UniqueKey('version'));
@@ -188,7 +188,7 @@ class Migration implements ServiceLocatorAwareInterface
      */
     public function getMaxMigrationVersion(\ArrayIterator $migrations)
     {
-        $versions = array();
+        $versions = [];
         foreach ($migrations as $migration) {
             $versions[] = $migration['version'];
         }
@@ -224,12 +224,12 @@ class Migration implements ServiceLocatorAwareInterface
                         $reflectionDescription = new \ReflectionProperty($className, 'description');
 
                         if ($reflectionClass->implementsInterface('ZfSimpleMigrations\Library\MigrationInterface')) {
-                            $classes->append(array(
+                            $classes->append([
                                 'version' => $matches[2],
                                 'class' => $className,
                                 'description' => $reflectionDescription->getValue(),
                                 'applied' => $applied,
-                            ));
+                            ]);
                         }
                     }
                 }
@@ -268,8 +268,7 @@ class Migration implements ServiceLocatorAwareInterface
                 $migrationObject->setServiceLocator($this->serviceLocator);
             }
 
-            if ($migrationObject instanceof AdapterAwareInterface)
-            {
+            if ($migrationObject instanceof AdapterAwareInterface) {
                 if (is_null($this->adapter)) {
                     throw new \RuntimeException(
                         sprintf(

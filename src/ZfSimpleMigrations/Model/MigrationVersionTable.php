@@ -18,18 +18,18 @@ class MigrationVersionTable
 
     public function save($version)
     {
-        $this->tableGateway->insert(array('version' => $version));
+        $this->tableGateway->insert(['version' => $version]);
         return $this->tableGateway->lastInsertValue;
     }
 
     public function delete($version)
     {
-        $this->tableGateway->delete(array('version' => $version));
+        $this->tableGateway->delete(['version' => $version]);
     }
 
     public function applied($version)
     {
-        $result = $this->tableGateway->select(array('version' => $version));
+        $result = $this->tableGateway->select(['version' => $version]);
         return $result->count() > 0;
     }
 
