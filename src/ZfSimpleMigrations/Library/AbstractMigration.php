@@ -7,7 +7,7 @@ use ZfSimpleMigrations\Library\MigrationInterface;
 
 abstract class AbstractMigration implements MigrationInterface
 {
-    private $sql = array();
+    private $sql = [];
     private $metadata;
     private $writer;
 
@@ -34,7 +34,7 @@ abstract class AbstractMigration implements MigrationInterface
      */
     public function getUpSql()
     {
-        $this->sql = array();
+        $this->sql = [];
         $this->up($this->metadata);
 
         return $this->sql;
@@ -47,7 +47,7 @@ abstract class AbstractMigration implements MigrationInterface
      */
     public function getDownSql()
     {
-        $this->sql = array();
+        $this->sql = [];
         $this->down($this->metadata);
 
         return $this->sql;

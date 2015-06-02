@@ -1,65 +1,72 @@
 <?php
 
-return array(
-    'migrations' => array(
-        'dir' => dirname(__FILE__) . '/../../../../migrations',
-        'namespace' => 'ZfSimpleMigrations\Migrations',
-        'show_log' => true
-    ),
-    'console' => array(
-        'router' => array(
-            'routes' => array(
-                'migration-version' => array(
+return [
+    'migrations' => [
+        'default' => [
+            'dir' => dirname(__FILE__) . '/../../../../migrations',
+            'namespace' => 'ZfSimpleMigrations\Migrations',
+            'show_log' => true,
+            'adapter' => 'Zend\Db\Adapter\Adapter'
+        ],
+    ],
+    'console' => [
+        'router' => [
+            'routes' => [
+                'migration-version' => [
                     'type' => 'simple',
-                    'options' => array(
-                        'route' => 'migration version [--env=]',
-                        'defaults' => array(
+                    'options' => [
+                        'route' => 'migration version [<name>] [--env=]',
+                        'defaults' => [
                             'controller' => 'ZfSimpleMigrations\Controller\Migrate',
-                            'action' => 'version'
-                        )
-                    )
-                ),
-                'migration-list' => array(
+                            'action' => 'version',
+                            'name' => 'default'
+                        ]
+                    ]
+                ],
+                'migration-list' => [
                     'type' => 'simple',
-                    'options' => array(
-                        'route' => 'migration list [--env=] [--all]',
-                        'defaults' => array(
+                    'options' => [
+                        'route' => 'migration list [<name>] [--env=] [--all]',
+                        'defaults' => [
                             'controller' => 'ZfSimpleMigrations\Controller\Migrate',
-                            'action' => 'list'
-                        )
-                    )
-                ),
-                'migration-apply' => array(
+                            'action' => 'list',
+                            'name' => 'default'
+                        ]
+                    ]
+                ],
+                'migration-apply' => [
                     'type' => 'simple',
-                    'options' => array(
-                        'route' => 'migration apply [<version>] [--env=] [--force] [--down] [--fake]',
-                        'defaults' => array(
+                    'options' => [
+                        'route' => 'migration apply [<name>] [<version>] [--env=] [--force] [--down] [--fake]',
+                        'defaults' => [
                             'controller' => 'ZfSimpleMigrations\Controller\Migrate',
-                            'action' => 'apply'
-                        )
-                    )
-                ),
-                'migration-generate' => array(
+                            'action' => 'apply',
+                            'name' => 'default'
+                        ]
+                    ]
+                ],
+                'migration-generate' => [
                     'type' => 'simple',
-                    'options' => array(
-                        'route' => 'migration generate [--env=]',
-                        'defaults' => array(
+                    'options' => [
+                        'route' => 'migration generate [<name>] [--env=]',
+                        'defaults' => [
                             'controller' => 'ZfSimpleMigrations\Controller\Migrate',
-                            'action' => 'generateSkeleton'
-                        )
-                    )
-                )
-            )
-        )
-    ),
-    'controllers' => array(
-        'invokables' => array(
-            'ZfSimpleMigrations\Controller\Migrate' => 'ZfSimpleMigrations\Controller\MigrateController'
-        ),
-    ),
-    'view_manager' => array(
-        'template_path_stack' => array(
+                            'action' => 'generateSkeleton',
+                            'name' => 'default'
+                        ]
+                    ]
+                ]
+            ]
+        ]
+    ],
+    'controllers' => [
+        'factories' => [
+            'ZfSimpleMigrations\Controller\Migrate' => 'ZfSimpleMigrations\\Controller\\MigrateControllerFactory'
+        ],
+    ],
+    'view_manager' => [
+        'template_path_stack' => [
             __DIR__ . '/../view',
-        ),
-    ),
-);
+        ],
+    ],
+];

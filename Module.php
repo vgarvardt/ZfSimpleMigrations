@@ -26,7 +26,6 @@ class Module implements
      */
     public function onBootstrap(EventInterface $e)
     {
-        $e->getApplication()->getServiceManager()->get('translator');
         $eventManager = $e->getApplication()->getEventManager();
         $moduleRouteListener = new ModuleRouteListener();
         $moduleRouteListener->attach($eventManager);
@@ -39,63 +38,58 @@ class Module implements
 
     public function getAutoloaderConfig()
     {
-        return array(
-            'Zend\Loader\StandardAutoloader' => array(
-                'namespaces' => array(
+        return [
+            'Zend\Loader\StandardAutoloader' => [
+                'namespaces' => [
                     __NAMESPACE__ => __DIR__ . '/src/' . __NAMESPACE__,
-                ),
-            ),
-        );
+                ],
+            ],
+        ];
     }
 
     public function getServiceConfig()
     {
-        return array(
-            'factories' => array(
-                'ZfSimpleMigrations\Model\MigrationVersionTable' => function (ServiceLocatorInterface $serviceLocator) {
-                        /** @var $tableGateway TableGateway */
-                        $tableGateway = $serviceLocator->get('ZfSimpleMigrationsVersionTableGateway');
-                        $table = new Model\MigrationVersionTable($tableGateway);
-                        return $table;
-                    },
-                'ZfSimpleMigrationsVersionTableGateway' => function (ServiceLocatorInterface $serviceLocator) {
-                        /** @var $dbAdapter \Zend\Db\Adapter\Adapter */
-                        $dbAdapter = $serviceLocator->get('Zend\Db\Adapter\Adapter');
-                        $resultSetPrototype = new ResultSet();
-                        $resultSetPrototype->setArrayObjectPrototype(new Model\MigrationVersion());
-                        return new TableGateway(Model\MigrationVersion::TABLE_NAME, $dbAdapter, null, $resultSetPrototype);
-                    },
-            ),
-        );
+        return [
+            'abstract_factories' => [
+                'ZfSimpleMigrations\\Library\\MigrationAbstractFactory',
+                'ZfSimpleMigrations\\Model\\MigrationVersionTableAbstractFactory',
+                'ZfSimpleMigrations\\Model\\MigrationVersionTableGatewayAbstractFactory',
+                'ZfSimpleMigrations\\Library\\MigrationSkeletonGeneratorAbstractFactory'
+            ],
+        ];
     }
 
     public function getConsoleUsage(Console $console)
     {
-        return array(
+        return [
             'Get last applied migration version',
-            'migration version' => '',
+            'migration version [<name>]' => '',
+            ['[<name>]', 'specify which configured migrations to run, defaults to `default`'],
 
             'List available migrations',
-            'migration list [--all]' => '',
-            array('--all', 'Include applied migrations'),
+            'migration list [<name>] [--all]' => '',
+            ['--all', 'Include applied migrations'],
+            ['[<name>]', 'specify which configured migrations to run, defaults to `default`'],
 
             'Generate new migration skeleton class',
-            'migration generate' => '',
+            'migration generate [<name>]' => '',
+            ['[<name>]', 'specify which configured migrations to run, defaults to `default`'],
 
             'Execute migration',
-            'migration apply [<version>] [--force] [--down] [--fake]' => '',
-            array(
+            'migration apply [<name>] [<version>] [--force] [--down] [--fake]' => '',
+            ['[<name>]', 'specify which configured migrations to run, defaults to `default`'],
+            [
                 '--force',
                 'Force apply migration even if it\'s older than the last migrated. Works only with <version> explicitly set.'
-            ),
-            array(
+            ],
+            [
                 '--down',
                 'Force apply down migration. Works only with --force flag set.'
-            ),
-            array(
+            ],
+            [
                 '--fake',
                 'Fake apply or apply down migration. Adds/removes migration to the list of applied w/out really applying it. Works only with <version> explicitly set.'
-            ),
-        );
+            ],
+        ];
     }
 }

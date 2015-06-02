@@ -3,6 +3,7 @@
 namespace ZfSimpleMigrations\Library;
 
 use Zend\Db\Adapter\Adapter;
+use Zend\Db\Adapter\AdapterAwareInterface;
 use Zend\Db\Adapter\Driver\Pdo\Pdo;
 use Zend\Db\Adapter\Exception\InvalidQueryException;
 use Zend\Db\Metadata\Metadata;
@@ -73,7 +74,7 @@ class Migration implements ServiceLocatorAwareInterface
     protected function checkCreateMigrationTable()
     {
         $table = new Ddl\CreateTable(MigrationVersion::TABLE_NAME);
-        $table->addColumn(new Ddl\Column\Integer('id', false, null, array('autoincrement' => true)));
+        $table->addColumn(new Ddl\Column\Integer('id', false, null, ['autoincrement' => true]));
         $table->addColumn(new Ddl\Column\BigInteger('version'));
         $table->addConstraint(new Ddl\Constraint\PrimaryKey('id'));
         $table->addConstraint(new Ddl\Constraint\UniqueKey('version'));
@@ -187,7 +188,7 @@ class Migration implements ServiceLocatorAwareInterface
      */
     public function getMaxMigrationVersion(\ArrayIterator $migrations)
     {
-        $versions = array();
+        $versions = [];
         foreach ($migrations as $migration) {
             $versions[] = $migration['version'];
         }
@@ -223,12 +224,12 @@ class Migration implements ServiceLocatorAwareInterface
                         $reflectionDescription = new \ReflectionProperty($className, 'description');
 
                         if ($reflectionClass->implementsInterface('ZfSimpleMigrations\Library\MigrationInterface')) {
-                            $classes->append(array(
+                            $classes->append([
                                 'version' => $matches[2],
                                 'class' => $className,
                                 'description' => $reflectionDescription->getValue(),
                                 'applied' => $applied,
-                            ));
+                            ]);
                         }
                     }
                 }
@@ -258,13 +259,26 @@ class Migration implements ServiceLocatorAwareInterface
                 if (is_null($this->serviceLocator)) {
                     throw new \RuntimeException(
                         sprintf(
-                            'Migration class %s requires a ServiceLocator, but it is no instance available.',
+                            'Migration class %s requires a ServiceLocator, but there is no instance available.',
                             get_class($migrationObject)
                         )
                     );
                 }
 
                 $migrationObject->setServiceLocator($this->serviceLocator);
+            }
+
+            if ($migrationObject instanceof AdapterAwareInterface) {
+                if (is_null($this->adapter)) {
+                    throw new \RuntimeException(
+                        sprintf(
+                            'Migration class %s requires an Adapter, but there is no instance available.',
+                            get_class($migrationObject)
+                        )
+                    );
+                }
+
+                $migrationObject->setDbAdapter($this->adapter);
             }
 
             $this->outputWriter->writeLine(sprintf("%sExecute migration class %s %s",
