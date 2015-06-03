@@ -301,7 +301,8 @@ class Migration implements ServiceLocatorAwareInterface
             $this->connection->commit();
         } catch (InvalidQueryException $e) {
             $this->connection->rollback();
-            $msg = sprintf('%s: "%s"; File: %s; Line #%d', $e->getMessage(), $e->getPrevious()->getMessage(), $e->getFile(), $e->getLine());
+            $previous_message = $e->getPrevious() ? $e->getPrevious()->getMessage() : null;
+            $msg = sprintf('%s: "%s"; File: %s; Line #%d', $e->getMessage(), $previous_message, $e->getFile(), $e->getLine());
             throw new MigrationException($msg);
         } catch (\Exception $e) {
             $this->connection->rollback();
