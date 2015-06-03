@@ -38,58 +38,58 @@ class Module implements
 
     public function getAutoloaderConfig()
     {
-        return array(
-            'Zend\Loader\StandardAutoloader' => array(
-                'namespaces' => array(
+        return [
+            'Zend\Loader\StandardAutoloader' => [
+                'namespaces' => [
                     __NAMESPACE__ => __DIR__ . '/src/' . __NAMESPACE__,
-                ),
-            ),
-        );
+                ],
+            ],
+        ];
     }
 
     public function getServiceConfig()
     {
-        return array(
-            'abstract_factories' => array(
+        return [
+            'abstract_factories' => [
                 'ZfSimpleMigrations\\Library\\MigrationAbstractFactory',
                 'ZfSimpleMigrations\\Model\\MigrationVersionTableAbstractFactory',
                 'ZfSimpleMigrations\\Model\\MigrationVersionTableGatewayAbstractFactory',
                 'ZfSimpleMigrations\\Library\\MigrationSkeletonGeneratorAbstractFactory'
-            ),
-        );
+            ],
+        ];
     }
 
     public function getConsoleUsage(Console $console)
     {
-        return array(
+        return [
             'Get last applied migration version',
             'migration version [<name>]' => '',
-            array('[<name>]', 'specify which configured migrations to run, defaults to `default`'),
+            ['[<name>]', 'specify which configured migrations to run, defaults to `default`'],
 
             'List available migrations',
             'migration list [<name>] [--all]' => '',
-            array('--all', 'Include applied migrations'),
-            array('[<name>]', 'specify which configured migrations to run, defaults to `default`'),
+            ['--all', 'Include applied migrations'],
+            ['[<name>]', 'specify which configured migrations to run, defaults to `default`'],
 
             'Generate new migration skeleton class',
             'migration generate [<name>]' => '',
-            array('[<name>]', 'specify which configured migrations to run, defaults to `default`'),
+            ['[<name>]', 'specify which configured migrations to run, defaults to `default`'],
 
             'Execute migration',
             'migration apply [<name>] [<version>] [--force] [--down] [--fake]' => '',
-            array('[<name>]', 'specify which configured migrations to run, defaults to `default`'),
-            array(
+            ['[<name>]', 'specify which configured migrations to run, defaults to `default`'],
+            [
                 '--force',
                 'Force apply migration even if it\'s older than the last migrated. Works only with <version> explicitly set.'
-            ),
-            array(
+            ],
+            [
                 '--down',
                 'Force apply down migration. Works only with --force flag set.'
-            ),
-            array(
+            ],
+            [
                 '--fake',
                 'Fake apply or apply down migration. Adds/removes migration to the list of applied w/out really applying it. Works only with <version> explicitly set.'
-            ),
-        );
+            ],
+        ];
     }
 }

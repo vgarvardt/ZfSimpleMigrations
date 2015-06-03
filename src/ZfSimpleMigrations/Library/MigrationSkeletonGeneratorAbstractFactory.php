@@ -35,8 +35,7 @@ class MigrationSkeletonGeneratorAbstractFactory implements AbstractFactoryInterf
      */
     public function createServiceWithName(ServiceLocatorInterface $serviceLocator, $name, $requestedName)
     {
-        if($serviceLocator instanceof AbstractPluginManager)
-        {
+        if ($serviceLocator instanceof AbstractPluginManager) {
             $serviceLocator = $serviceLocator->getServiceLocator();
         }
 
@@ -46,18 +45,17 @@ class MigrationSkeletonGeneratorAbstractFactory implements AbstractFactoryInterf
 
         $config = $serviceLocator->get('Config');
 
-        if(!isset($config['migrations'][$migration_name]))
-        {
+        if (! isset($config['migrations'][$migration_name])) {
             throw new RuntimeException(sprintf("`%s` is not in migrations configuration", $migration_name));
         }
 
         $migration_config = $config['migrations'][$migration_name];
 
-        if(!isset($migration_config['dir'])){
+        if (! isset($migration_config['dir'])) {
             throw new RuntimeException(sprintf("`dir` has not be specified in `%s` migrations configuration", $migration_name));
         }
 
-        if(!isset($migration_config['namespace'])){
+        if (! isset($migration_config['namespace'])) {
             throw new RuntimeException(sprintf("`namespace` has not be specified in `%s` migrations configuration", $migration_name));
         }
 
