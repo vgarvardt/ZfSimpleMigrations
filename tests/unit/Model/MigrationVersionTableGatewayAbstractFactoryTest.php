@@ -30,11 +30,9 @@ class MigrationVersionTableGatewayAbstractFactoryTest extends \PHPUnit_Framework
         $this->assertTrue($factory->canCreateServiceWithName($this->service_manager,
             'migrations.versiontablegateway.foo', 'asdf'), "should indicate it provides service for \$name");
 
-        $factory = new MigrationVersionTableGatewayAbstractFactory();
         $this->assertTrue($factory->canCreateServiceWithName($this->service_manager,
             'asdf', 'migrations.versiontablegateway.foo'), "should indicate it provides service for \$requestedName");
 
-        $factory = new MigrationVersionTableGatewayAbstractFactory();
         $this->assertFalse($factory->canCreateServiceWithName($this->service_manager,
             'asdf', 'asdf'), "should indicate it does not provide service for \$name or \$requestedName");
     }

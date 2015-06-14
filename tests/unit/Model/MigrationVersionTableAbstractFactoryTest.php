@@ -35,11 +35,9 @@ class MigrationVersionTableAbstractFactoryTest extends \PHPUnit_Framework_TestCa
         $this->assertTrue($factory->canCreateServiceWithName($this->service_manager,
         'migrations.versiontable.foo', 'asdf'), "should indicate it provides service for \$name");
 
-        $factory = new MigrationVersionTableAbstractFactory();
         $this->assertTrue($factory->canCreateServiceWithName($this->service_manager,
             'asdf', 'migrations.versiontable.foo'), "should indicate it provides service for \$requestedName");
 
-        $factory = new MigrationVersionTableAbstractFactory();
         $this->assertFalse($factory->canCreateServiceWithName($this->service_manager,
             'asdf', 'asdf'), "should indicate it does not provide service for \$name or \$requestedName");
     }

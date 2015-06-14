@@ -36,16 +36,14 @@ class MigrationSkeletonGeneratorAbstractFactoryTest extends \PHPUnit_Framework_T
         $this->assertTrue($factory->canCreateServiceWithName($this->service_manager,
             'migrations.skeletongenerator.foo', 'asdf'), "should indicate it provides service for \$name");
 
-        $factory = new MigrationSkeletonGeneratorAbstractFactory();
         $this->assertTrue($factory->canCreateServiceWithName($this->service_manager,
             'asdf', 'migrations.skeletongenerator.foo'), "should indicate it provides service for \$requestedName");
 
-        $factory = new MigrationSkeletonGeneratorAbstractFactory();
         $this->assertFalse($factory->canCreateServiceWithName($this->service_manager,
             'asdf', 'asdf'), "should indicate it does not provide service for \$name or \$requestedName");
     }
 
-    public function test_it_returns_a_table_gateway()
+    public function test_it_returns_a_skeleton_generator()
     {
         $factory = new MigrationSkeletonGeneratorAbstractFactory();
         $instance = $factory->createServiceWithName($this->service_manager, 'migrations.skeletongenerator.foo', 'asdf');
