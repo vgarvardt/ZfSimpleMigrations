@@ -31,7 +31,7 @@ class MigrationAbstractFactory implements AbstractFactoryInterface
      * @param ServiceLocatorInterface $serviceLocator
      * @param $name
      * @param $requestedName
-     * @return mixed
+     * @return Migration
      */
     public function createServiceWithName(ServiceLocatorInterface $serviceLocator, $name, $requestedName)
     {

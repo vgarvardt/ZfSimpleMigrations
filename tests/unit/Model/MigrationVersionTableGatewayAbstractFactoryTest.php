@@ -6,6 +6,7 @@ namespace ZfSimpleMigrations\UnitTest\Model;
 
 use Zend\Db\Adapter\Adapter;
 use Zend\Db\TableGateway\TableGateway;
+use Zend\Mvc\Controller\ControllerManager;
 use Zend\ServiceManager\ServiceManager;
 use ZfSimpleMigrations\Model\MigrationVersionTableGatewayAbstractFactory;
 

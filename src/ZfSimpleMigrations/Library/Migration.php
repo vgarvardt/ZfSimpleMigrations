@@ -37,6 +37,14 @@ class Migration implements ServiceLocatorAwareInterface
     protected $serviceLocator;
 
     /**
+     * @return \ZfSimpleMigrations\Library\OutputWriter
+     */
+    public function getOutputWriter()
+    {
+        return $this->outputWriter;
+    }
+
+    /**
      * @param \Zend\Db\Adapter\Adapter $adapter
      * @param array $config
      * @param \ZfSimpleMigrations\Model\MigrationVersionTable $migrationVersionTable

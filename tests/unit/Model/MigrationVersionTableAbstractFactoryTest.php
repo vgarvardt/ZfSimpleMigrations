@@ -10,6 +10,7 @@ namespace ZfSimpleMigrations\UnitTest\Model;
 
 
 use Zend\Db\TableGateway\TableGateway;
+use Zend\Mvc\Controller\ControllerManager;
 use Zend\ServiceManager\ServiceManager;
 use ZfSimpleMigrations\Model\MigrationVersionTable;
 use ZfSimpleMigrations\Model\MigrationVersionTableAbstractFactory;
