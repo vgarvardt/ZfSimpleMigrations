@@ -301,7 +301,18 @@ class Migration implements ServiceLocatorAwareInterface
                     $statement->execute();
                     /** @var \PDOStatement $statement */
                     $statement = $statement->getResource();
-                    while ($statement->nextRowset()) {/* https://bugs.php.net/bug.php?id=61613 */}
+                    try {
+                        while ($statement->nextRowset()) {/* https://bugs.php.net/bug.php?id=61613 */
+                        }
+                    } catch (\PDOException $e) {
+                        // Ignore exception IM001: Driver does not support this function
+                        if(strpos($e->getMessage(), 'SQLSTATE[IM001]') === false) {
+                            throw $e;
+                        }
+                        $this->outputWriter->writeLine("This driver does not support multiple row sets."
+                        . " Avoid sending multiple statements in a single query as we can't check"
+                        . " if there were errors for anything that the first statement.");
+                    }
                 }
             }
 
@@ -315,11 +326,11 @@ class Migration implements ServiceLocatorAwareInterface
             $this->connection->rollback();
             $previousMessage = $e->getPrevious() ? $e->getPrevious()->getMessage() : null;
             $msg = sprintf('%s: "%s"; File: %s; Line #%d', $e->getMessage(), $previousMessage, $e->getFile(), $e->getLine());
-            throw new MigrationException($msg);
+            throw new MigrationException($msg, $e->getCode(), $e);
         } catch (\Exception $e) {
             $this->connection->rollback();
             $msg = sprintf('%s; File: %s; Line #%d', $e->getMessage(), $e->getFile(), $e->getLine());
-            throw new MigrationException($msg);
+            throw new MigrationException($msg, $e->getCode(), $e);
         }
     }
 
