@@ -7,8 +7,25 @@ env:
   - DB=sqlite
   - DB=mysql
   - DB=postgresql
+
+matrix:
+  allow_failures:
+    - php: "5.4"
+      env: DB=mysql
+    - php: "5.5"
+      env: DB=mysql
+    - php: "5.6"
+      env: DB=mysql
+    - php: "5.4"
+      env: DB=postgresql
+    - php: "5.5"
+      env: DB=postgresql
+    - php: "5.6"
+      env: DB=postgresql
+
 services:
     - postgresql
+
 before_script:
     - composer install
     - mysql -e "create database IF NOT EXISTS test;" -uroot
