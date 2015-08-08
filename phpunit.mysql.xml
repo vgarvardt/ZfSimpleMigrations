@@ -1,0 +1,18 @@
+<phpunit
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="http://schema.phpunit.de/4.6/phpunit.xsd"
+        >
+    <testsuites>
+        <testsuite name="Integration Tests">
+            <directory>tests/integration</directory>
+        </testsuite>
+    </testsuites>
+    <php>
+        <env name="db_type" value="Mysqli"/>
+        <env name="db_host" value="localhost" />
+        <env name="db_username" value="travis" />
+        <env name="db_password" value="" />
+        <env name="db_name" value="test" />
+        <env name="db_port" value=""/>
+    </php>
+</phpunit>

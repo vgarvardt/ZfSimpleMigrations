@@ -15,6 +15,7 @@ use Zend\Db\ResultSet\ResultSet;
 use Zend\Db\Sql\Ddl\DropTable;
 use Zend\Db\TableGateway\TableGateway;
 use ZfSimpleMigrations\Library\Migration;
+use ZfSimpleMigrations\Library\MigrationException;
 use ZfSimpleMigrations\Model\MigrationVersion;
 use ZfSimpleMigrations\Model\MigrationVersionTable;
 
@@ -22,6 +23,8 @@ class MigrationTest extends \PHPUnit_Framework_TestCase
 {
     /** @var  Adapter */
     private $adapter;
+    /** @var  Migration */
+    private $migration;
 
     protected function setUp()
     {
@@ -35,6 +38,10 @@ class MigrationTest extends \PHPUnit_Framework_TestCase
             'hostname' => getenv('db_host'),
             'port' => getenv('db_port')
         ];
+        $config = [
+            'dir' => __DIR__ . '/../data/ApplyMigration',
+            'namespace' => 'ApplyMigration'
+        ];
 
        $this->adapter = $adapter = new Adapter($driverConfig);
 
@@ -46,14 +53,6 @@ class MigrationTest extends \PHPUnit_Framework_TestCase
             $drop_test = new DropTable('test');
             $adapter->query($drop_test->getSqlString($adapter->getPlatform()));
         }
-    }
-
-    public function test_apply_migration() {
-        $config = [
-            'dir' => __DIR__ . '/../data/ApplyMigration',
-            'namespace' => 'ApplyMigration'
-        ];
-        $adapter = $this->adapter;
 
         /** @var ArrayObject $version */
         $version = new MigrationVersion();
@@ -63,15 +62,39 @@ class MigrationTest extends \PHPUnit_Framework_TestCase
         $gateway = new TableGateway(MigrationVersion::TABLE_NAME, $adapter, null, $resultSetPrototype);
         $table = new MigrationVersionTable($gateway);
 
-        $migration = new Migration($adapter, $config, $table);
-        $migration->migrate(null);
+        $this->migration = new Migration($adapter, $config, $table);
+    }
 
-        $metadata = new Metadata($adapter);
+    public function test_apply_migration() {
+        $this->migration->migrate('01');
+
+        $metadata = new Metadata($this->adapter);
         $this->assertContains('test', $metadata->getTableNames(), 'up should create table');
 
-        $migration->migrate('01', true, true);
+        $this->migration->migrate('01', true, true);
 
-        $metadata = new Metadata($adapter);
+        $metadata = new Metadata($this->adapter);
         $this->assertNotContains('test', $metadata->getTableNames(), 'down should drop table');
+    }
+
+    /**
+     * @expectedException \ZfSimpleMigrations\Library\MigrationException
+     */
+    public function test_multi_statement_error_detection()
+    {
+        if(strtolower(getenv('db_type')) == 'pdo_sqlite'){
+            echo "blah";
+            $this->markTestSkipped('sqlite driver does not support multi row sets [how we test for errors w/ multi statements]');
+        }
+
+        try {
+            $this->migration->migrate('02');
+        } catch (\Exception $e) {
+            $this->migration->migrate('02', true, true);
+            $this->assertEquals('ZfSimpleMigrations\Library\MigrationException', get_class($e));
+            return;
+        }
+
+        $this->fail(sprintf('expected exception %s', MigrationException::class));
     }
 }
