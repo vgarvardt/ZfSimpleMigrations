@@ -15,7 +15,6 @@ use Zend\Db\ResultSet\ResultSet;
 use Zend\Db\Sql\Ddl\DropTable;
 use Zend\Db\TableGateway\TableGateway;
 use ZfSimpleMigrations\Library\Migration;
-use ZfSimpleMigrations\Library\MigrationException;
 use ZfSimpleMigrations\Model\MigrationVersion;
 use ZfSimpleMigrations\Model\MigrationVersionTable;
 
@@ -48,11 +47,18 @@ class MigrationTest extends \PHPUnit_Framework_TestCase
         $metadata = new Metadata($adapter);
         $tableNames = $metadata->getTableNames();
 
-        if(in_array('test',$tableNames)){
-            // ensure db is in expected state
-            $drop_test = new DropTable('test');
-            $adapter->query($drop_test->getSqlString($adapter->getPlatform()));
+        $drop_if_exists = array(
+            'test',
+            MigrationVersion::TABLE_NAME
+        );
+        foreach($drop_if_exists as $table) {
+            if(in_array($table,$tableNames)){
+                // ensure db is in expected state
+                $drop = new DropTable($table);
+                $adapter->query($drop->getSqlString($adapter->getPlatform()));
+            }
         }
+
 
         /** @var ArrayObject $version */
         $version = new MigrationVersion();
@@ -83,7 +89,6 @@ class MigrationTest extends \PHPUnit_Framework_TestCase
     public function test_multi_statement_error_detection()
     {
         if(strtolower(getenv('db_type')) == 'pdo_sqlite'){
-            echo "blah";
             $this->markTestSkipped('sqlite driver does not support multi row sets [how we test for errors w/ multi statements]');
         }
 
@@ -96,5 +101,13 @@ class MigrationTest extends \PHPUnit_Framework_TestCase
         }
 
         $this->fail(sprintf('expected exception %s', '\ZfSimpleMigrations\Library\MigrationException'));
+    }
+
+    public function test_migration_initializes_migration_table()
+    {
+        // because Migration was instantiated in setup, the version table should exist
+        $metadata = new Metadata($this->adapter);
+        $tableNames = $metadata->getTableNames();
+        $this->assertContains(MigrationVersion::TABLE_NAME, $tableNames);
     }
 }
