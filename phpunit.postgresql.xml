@@ -14,6 +14,6 @@
         <env name="db_username" value="postgres" />
         <env name="db_password" value="" />
         <env name="db_name" value="test" />
-        <env name="db_port" value=""/>
+        <env name="db_port" value="5432"/>
     </php>
 </phpunit>
