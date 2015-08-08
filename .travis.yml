@@ -10,17 +10,17 @@ env:
 
 matrix:
   allow_failures:
-    - php: "5.4"
+    - php: 5.4
       env: DB=mysql
-    - php: "5.5"
+    - php: 5.5
       env: DB=mysql
-    - php: "5.6"
+    - php: 5.6
       env: DB=mysql
-    - php: "5.4"
+    - php: 5.4
       env: DB=postgresql
-    - php: "5.5"
+    - php: 5.5
       env: DB=postgresql
-    - php: "5.6"
+    - php: 5.6
       env: DB=postgresql
 
 services:
