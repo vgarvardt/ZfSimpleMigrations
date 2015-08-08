@@ -33,7 +33,7 @@ class MigrationTest extends \PHPUnit_Framework_TestCase
             'driver' => getenv('db_type'),
             // sqlite handling (if necessary)
             'database' => str_replace('%BASE_DIR%', __DIR__ . '/../../../', getenv('db_name')),
-            'username' => getenv('db_user'),
+            'username' => getenv('db_username'),
             'password' => getenv('db_password'),
             'hostname' => getenv('db_host'),
             'port' => getenv('db_port')
