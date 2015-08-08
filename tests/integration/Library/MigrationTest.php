@@ -95,6 +95,6 @@ class MigrationTest extends \PHPUnit_Framework_TestCase
             return;
         }
 
-        $this->fail(sprintf('expected exception %s', MigrationException::class));
+        $this->fail(sprintf('expected exception %s', '\ZfSimpleMigrations\Library\MigrationException'));
     }
 }

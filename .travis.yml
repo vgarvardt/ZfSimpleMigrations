@@ -11,4 +11,4 @@ services:
     - postgresql
 before_script:
     - composer install
-script: phpunit --configuration phpunit.$DB.xml
+script: phpunit -c phpunit.${DB}.xml
