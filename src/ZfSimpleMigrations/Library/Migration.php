@@ -296,7 +296,12 @@ class Migration implements ServiceLocatorAwareInterface
                 $sqlList = $down ? $migrationObject->getDownSql() : $migrationObject->getUpSql();
                 foreach ($sqlList as $sql) {
                     $this->outputWriter->writeLine("Execute query:\n\n" . $sql);
-                    $this->connection->execute($sql);
+                    /** @var \Zend\Db\Adapter\Driver\Pdo\Statement $statement */
+                    $statement = $this->connection->prepare($sql);
+                    $statement->execute();
+                    /** @var \PDOStatement $statement */
+                    $statement = $statement->getResource();
+                    while ($statement->nextRowset()) {/* https://bugs.php.net/bug.php?id=61613 */}
                 }
             }
 
