@@ -91,9 +91,7 @@ class MigrationTest extends \PHPUnit_Framework_TestCase
      */
     public function test_multi_statement_error_detection()
     {
-        if(strtolower(getenv('db_type')) == 'pdo_sqlite'){
-            $this->markTestSkipped('sqlite driver does not support multi row sets [how we test for errors w/ multi statements]');
-        }
+        $this->markTestSkipped('need to implement driver specific features & test if this driver supports multi-row functionality');
 
         try {
             $this->migration->migrate('02');

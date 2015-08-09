@@ -296,20 +296,7 @@ class Migration implements ServiceLocatorAwareInterface
                 $sqlList = $down ? $migrationObject->getDownSql() : $migrationObject->getUpSql();
                 foreach ($sqlList as $sql) {
                     $this->outputWriter->writeLine("Execute query:\n\n" . $sql);
-                    $result = $this->connection->execute($sql);
-                    $statement = $result->getResource();
-                    try {
-                        while ($statement->nextRowset()) {/* https://bugs.php.net/bug.php?id=61613 */
-                        }
-                    } catch (\PDOException $e) {
-                        // Ignore exception IM001: Driver does not support this function
-                        if(strpos($e->getMessage(), 'SQLSTATE[IM001]') === false) {
-                            throw $e;
-                        }
-                        $this->outputWriter->writeLine("This driver does not support multiple row sets."
-                        . " Avoid sending multiple statements in a single query as we can't check"
-                        . " if there were errors for anything that the first statement.");
-                    }
+                    $this->connection->execute($sql);
                 }
             }
 
