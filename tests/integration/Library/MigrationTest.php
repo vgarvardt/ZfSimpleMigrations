@@ -35,7 +35,10 @@ class MigrationTest extends \PHPUnit_Framework_TestCase
             'username' => getenv('db_username'),
             'password' => getenv('db_password'),
             'hostname' => getenv('db_host'),
-            'port' => getenv('db_port')
+            'port' => getenv('db_port'),
+            'options' => array(
+                'buffer_results' => true,
+            ),
         ];
         $config = [
             'dir' => __DIR__ . '/../data/ApplyMigration',
