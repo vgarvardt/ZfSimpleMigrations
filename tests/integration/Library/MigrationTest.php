@@ -28,7 +28,7 @@ class MigrationTest extends \PHPUnit_Framework_TestCase
     protected function setUp()
     {
         parent::setUp();
-        $driverConfig = array(
+        $driverConfig = [
             'driver' => getenv('db_type'),
             // sqlite handling (if necessary)
             'database' => str_replace('%BASE_DIR%', __DIR__ . '/../../../', getenv('db_name')),
@@ -36,24 +36,24 @@ class MigrationTest extends \PHPUnit_Framework_TestCase
             'password' => getenv('db_password'),
             'hostname' => getenv('db_host'),
             'port' => getenv('db_port'),
-            'options' => array(
+            'options' => [
                 'buffer_results' => true,
-            ),
-        );
-        $config = array(
+            ],
+        ];
+        $config = [
             'dir' => __DIR__ . '/../data/ApplyMigration',
             'namespace' => 'ApplyMigration'
-        );
+        ];
 
        $this->adapter = $adapter = new Adapter($driverConfig);
 
         $metadata = new Metadata($adapter);
         $tableNames = $metadata->getTableNames();
 
-        $drop_if_exists = array(
+        $drop_if_exists = [
             'test',
             MigrationVersion::TABLE_NAME
-        );
+        ];
         foreach($drop_if_exists as $table) {
             if(in_array($table,$tableNames)){
                 // ensure db is in expected state
