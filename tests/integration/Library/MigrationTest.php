@@ -28,7 +28,7 @@ class MigrationTest extends \PHPUnit_Framework_TestCase
     protected function setUp()
     {
         parent::setUp();
-        $driverConfig = [
+        $driverConfig = array(
             'driver' => getenv('db_type'),
             // sqlite handling (if necessary)
             'database' => str_replace('%BASE_DIR%', __DIR__ . '/../../../', getenv('db_name')),
@@ -39,7 +39,7 @@ class MigrationTest extends \PHPUnit_Framework_TestCase
             'options' => array(
                 'buffer_results' => true,
             ),
-        ];
+        );
         $config = [
             'dir' => __DIR__ . '/../data/ApplyMigration',
             'namespace' => 'ApplyMigration'
