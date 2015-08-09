@@ -40,10 +40,10 @@ class MigrationTest extends \PHPUnit_Framework_TestCase
                 'buffer_results' => true,
             ),
         );
-        $config = [
+        $config = array(
             'dir' => __DIR__ . '/../data/ApplyMigration',
             'namespace' => 'ApplyMigration'
-        ];
+        );
 
        $this->adapter = $adapter = new Adapter($driverConfig);
 
