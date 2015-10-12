@@ -21,7 +21,7 @@ class MigrationVersionTableAbstractFactory implements AbstractFactoryInterface
      */
     public function canCreateServiceWithName(ServiceLocatorInterface $serviceLocator, $name, $requestedName)
     {
-        return preg_match(self::FACTORY_PATTERN, $name);
+        return preg_match(self::FACTORY_PATTERN, $name) || preg_match(self::FACTORY_PATTERN, $requestedName);
     }
 
     /**
@@ -34,7 +34,10 @@ class MigrationVersionTableAbstractFactory implements AbstractFactoryInterface
      */
     public function createServiceWithName(ServiceLocatorInterface $serviceLocator, $name, $requestedName)
     {
-        preg_match(self::FACTORY_PATTERN, $name, $matches);
+        // $matches will be set by first preg_match if it matches, or second preg_match if it doesnt
+        preg_match(self::FACTORY_PATTERN, $name, $matches)
+        || preg_match(self::FACTORY_PATTERN, $requestedName, $matches);
+
         $adapter_name = $matches[1];
 
         /** @var $tableGateway TableGateway */

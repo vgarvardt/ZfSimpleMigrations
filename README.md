@@ -2,6 +2,14 @@
 
 Simple Migrations for Zend Framework 2. Project originally based on [ZendDbMigrations](https://github.com/vadim-knyzev/ZendDbMigrations) but module author did not response for issues and pull-requests so fork became independent project.
 
+## Supported Drivers
+The following DB adapter drivers are supported by this module.
+
+  * Pdo_Sqlite
+  * Pdo_Mysql
+  * Mysqli _only if you configure the driver options with `'buffer_results' => true`_
+
+
 ## Installation
 
 ### Using composer
@@ -49,6 +57,22 @@ class Version20130403165433 extends AbstractMigration
         //$this->addSql(/*Sql instruction*/);
     }
 }
+```
+
+#### Multi-statement sql
+While this module supports execution of multiple SQL statements it does not have way to detect if any other statement than the first contained an error. It is *highly* recommended you only provide single SQL statements to `addSql` at a time.
+I.e instead of
+
+```
+$this->addSql('SELECT NOW(); SELECT NOW(); SELECT NOW();');
+```
+
+You should use
+
+```
+$this->addSql('SELECT NOW();');
+$this->addSql('SELECT NOW();');
+$this->addSql('SELECT NOW();');
 ```
 
 ### Accessing ServiceLocator In Migration Class

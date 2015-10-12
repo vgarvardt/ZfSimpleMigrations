@@ -22,7 +22,8 @@ class MigrationSkeletonGeneratorAbstractFactory implements AbstractFactoryInterf
      */
     public function canCreateServiceWithName(ServiceLocatorInterface $serviceLocator, $name, $requestedName)
     {
-        return preg_match(self::FACTORY_PATTERN, $name);
+        return preg_match(self::FACTORY_PATTERN, $name)
+            || preg_match(self::FACTORY_PATTERN, $requestedName);
     }
 
     /**
@@ -39,7 +40,8 @@ class MigrationSkeletonGeneratorAbstractFactory implements AbstractFactoryInterf
             $serviceLocator = $serviceLocator->getServiceLocator();
         }
 
-        preg_match(self::FACTORY_PATTERN, $name, $matches);
+        preg_match(self::FACTORY_PATTERN, $name, $matches)
+            || preg_match(self::FACTORY_PATTERN, $requestedName, $matches);
         $migration_name = $matches[1];
 
 

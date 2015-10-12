@@ -37,6 +37,14 @@ class Migration implements ServiceLocatorAwareInterface
     protected $serviceLocator;
 
     /**
+     * @return \ZfSimpleMigrations\Library\OutputWriter
+     */
+    public function getOutputWriter()
+    {
+        return $this->outputWriter;
+    }
+
+    /**
      * @param \Zend\Db\Adapter\Adapter $adapter
      * @param array $config
      * @param \ZfSimpleMigrations\Model\MigrationVersionTable $migrationVersionTable
@@ -288,12 +296,7 @@ class Migration implements ServiceLocatorAwareInterface
                 $sqlList = $down ? $migrationObject->getDownSql() : $migrationObject->getUpSql();
                 foreach ($sqlList as $sql) {
                     $this->outputWriter->writeLine("Execute query:\n\n" . $sql);
-                    /** @var \Zend\Db\Adapter\Driver\Pdo\Statement $statement */
-                    $statement = $this->connection->prepare($sql);
-                    $statement->execute();
-                    /** @var \PDOStatement $statement */
-                    $statement = $statement->getResource();
-                    while ($statement->nextRowset()) {/* https://bugs.php.net/bug.php?id=61613 */}
+                    $this->connection->execute($sql);
                 }
             }
 
@@ -305,12 +308,13 @@ class Migration implements ServiceLocatorAwareInterface
             $this->connection->commit();
         } catch (InvalidQueryException $e) {
             $this->connection->rollback();
-            $msg = sprintf('%s: "%s"; File: %s; Line #%d', $e->getMessage(), $e->getPrevious()->getMessage(), $e->getFile(), $e->getLine());
-            throw new MigrationException($msg);
+            $previousMessage = $e->getPrevious() ? $e->getPrevious()->getMessage() : null;
+            $msg = sprintf('%s: "%s"; File: %s; Line #%d', $e->getMessage(), $previousMessage, $e->getFile(), $e->getLine());
+            throw new MigrationException($msg, $e->getCode(), $e);
         } catch (\Exception $e) {
             $this->connection->rollback();
             $msg = sprintf('%s; File: %s; Line #%d', $e->getMessage(), $e->getFile(), $e->getLine());
-            throw new MigrationException($msg);
+            throw new MigrationException($msg, $e->getCode(), $e);
         }
     }
 

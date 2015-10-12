@@ -22,7 +22,8 @@ class MigrationVersionTableGatewayAbstractFactory implements AbstractFactoryInte
      */
     public function canCreateServiceWithName(ServiceLocatorInterface $serviceLocator, $name, $requestedName)
     {
-        return preg_match(self::FACTORY_PATTERN, $name);
+        return preg_match(self::FACTORY_PATTERN, $name)
+            || preg_match(self::FACTORY_PATTERN, $requestedName);
     }
 
     /**
@@ -35,7 +36,8 @@ class MigrationVersionTableGatewayAbstractFactory implements AbstractFactoryInte
      */
     public function createServiceWithName(ServiceLocatorInterface $serviceLocator, $name, $requestedName)
     {
-        preg_match(self::FACTORY_PATTERN, $name, $matches);
+        preg_match(self::FACTORY_PATTERN, $name, $matches)
+            || preg_match(self::FACTORY_PATTERN, $requestedName, $matches);
         $adapter_name = $matches[1];
 
         /** @var $dbAdapter \Zend\Db\Adapter\Adapter */

@@ -1,0 +1,29 @@
+language: php
+php:
+  - 5.4
+  - 5.5
+  - 5.6
+env:
+  - DB=sqlite
+  - DB=mysql
+  - DB=mysqli
+  - DB=postgresql
+
+matrix:
+  allow_failures:
+    - php: 5.4
+      env: DB=postgresql
+    - php: 5.5
+      env: DB=postgresql
+    - php: 5.6
+      env: DB=postgresql
+
+services:
+    - postgresql
+
+before_script:
+    - composer install
+    - mysql -e "create database IF NOT EXISTS test;" -uroot
+    - psql -c 'create database test;' -U postgres
+
+script: phpunit -c phpunit.${DB}.xml

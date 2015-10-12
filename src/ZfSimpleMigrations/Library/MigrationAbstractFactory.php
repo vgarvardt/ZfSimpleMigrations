@@ -22,7 +22,7 @@ class MigrationAbstractFactory implements AbstractFactoryInterface
      */
     public function canCreateServiceWithName(ServiceLocatorInterface $serviceLocator, $name, $requestedName)
     {
-        return preg_match(self::FACTORY_PATTERN, $name);
+        return preg_match(self::FACTORY_PATTERN, $name) || preg_match(self::FACTORY_PATTERN, $requestedName);
     }
 
     /**
@@ -31,7 +31,7 @@ class MigrationAbstractFactory implements AbstractFactoryInterface
      * @param ServiceLocatorInterface $serviceLocator
      * @param $name
      * @param $requestedName
-     * @return mixed
+     * @return Migration
      */
     public function createServiceWithName(ServiceLocatorInterface $serviceLocator, $name, $requestedName)
     {
@@ -41,7 +41,9 @@ class MigrationAbstractFactory implements AbstractFactoryInterface
 
         $config = $serviceLocator->get('Config');
 
-        preg_match(self::FACTORY_PATTERN, $name, $matches);
+        preg_match(self::FACTORY_PATTERN, $name, $matches)
+        || preg_match(self::FACTORY_PATTERN, $requestedName, $matches);
+
         $name = $matches[1];
 
         if (! isset($config['migrations'][$name])) {
