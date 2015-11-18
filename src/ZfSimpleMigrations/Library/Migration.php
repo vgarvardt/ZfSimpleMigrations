@@ -82,9 +82,17 @@ class Migration implements ServiceLocatorAwareInterface
     protected function checkCreateMigrationTable()
     {
         $table = new Ddl\CreateTable(MigrationVersion::TABLE_NAME);
-        $table->addColumn(new Ddl\Column\Integer('id', false, null, ['autoincrement' => true]));
         $table->addColumn(new Ddl\Column\BigInteger('version'));
-        $table->addConstraint(new Ddl\Constraint\PrimaryKey('id'));
+
+
+        if($this->adapter->platform->getName() == 'PostgreSQL'){
+            $table->addColumn(new Ddl\Column\Integer('id', true));
+            $table->addConstraint(new Ddl\Constraint\PrimaryKey('version'));
+        }else{
+            $table->addColumn(new Ddl\Column\Integer('id', false, null, ['autoincrement' => true]));
+            $table->addConstraint(new Ddl\Constraint\PrimaryKey('id'));
+
+        }
         $table->addConstraint(new Ddl\Constraint\UniqueKey('version'));
 
         $sql = new Sql($this->adapter);
