@@ -98,7 +98,7 @@ class Migration implements ServiceLocatorAwareInterface
         $sql = new Sql($this->adapter);
 
         try {
-            $this->adapter->query($sql->getSqlStringForSqlObject($table), Adapter::QUERY_MODE_EXECUTE);
+            @$this->adapter->query($sql->buildSqlString($table), Adapter::QUERY_MODE_EXECUTE);
         } catch (\Exception $e) {
             // currently there are no db-independent way to check if table exists
             // so we assume that table exists when we catch exception
