@@ -16,6 +16,11 @@ class MigrationVersionTable
         $this->tableGateway = $tableGateway;
     }
 
+    public function tableGateway()
+    {
+        return $this->tableGateway;
+    }
+
     public function save($version)
     {
         $this->tableGateway->insert(['version' => $version]);

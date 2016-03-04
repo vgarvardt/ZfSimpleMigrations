@@ -19,22 +19,26 @@ class MigrateControllerFactory implements FactoryInterface
      * Create service
      *
      * @param ServiceLocatorInterface $serviceLocator
+     *
      * @return mixed
      */
     public function createService(ServiceLocatorInterface $serviceLocator)
     {
-        if($serviceLocator instanceof AbstractPluginManager)
-        {
+        if ($serviceLocator instanceof AbstractPluginManager) {
             $serviceLocator = $serviceLocator->getServiceLocator();
         }
 
         /** @var RouteMatch $routeMatch */
         $routeMatch = $serviceLocator->get('Application')->getMvcEvent()->getRouteMatch();
 
-        $name = $routeMatch->getParam('name', 'default');
+        $name            = $routeMatch->getParam('name', 'default');
+        $migrationConfig = $serviceLocator->get('config')['migrations'][$name];
+        $prefix          = isset($migrationConfig['prefix']) ? $migrationConfig['prefix'] : '';
 
         /** @var Migration $migration */
         $migration = $serviceLocator->get('migrations.migration.' . $name);
+        $migration->changeMigrationPrefix($prefix);
+
         /** @var MigrationSkeletonGenerator $generator */
         $generator = $serviceLocator->get('migrations.skeleton-generator.' . $name);
 

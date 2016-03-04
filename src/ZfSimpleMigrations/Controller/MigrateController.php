@@ -2,6 +2,7 @@
 namespace ZfSimpleMigrations\Controller;
 
 use Zend\Mvc\Controller\AbstractActionController;
+use Zend\Mvc\Controller\AbstractConsoleController;
 use Zend\Mvc\MvcEvent;
 use Zend\Console\Request as ConsoleRequest;
 use ZfSimpleMigrations\Library\Migration;
@@ -12,7 +13,7 @@ use ZfSimpleMigrations\Library\OutputWriter;
 /**
  * Migration commands controller
  */
-class MigrateController extends AbstractActionController
+class MigrateController extends AbstractConsoleController
 {
     /**
      * @var \ZfSimpleMigrations\Library\Migration
