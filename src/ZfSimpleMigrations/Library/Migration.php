@@ -114,18 +114,18 @@ class Migration implements ServiceLocatorAwareInterface
      */
     public function migrate($version = null, $force = false, $down = false, $fake = false)
     {
-        $migrations = $this->getMigrationClasses($force);
+        $migrations = $this->getMigrationClasses($force, $down);
 
         if (!is_null($version) && !$this->hasMigrationVersions($migrations, $version)) {
             throw new MigrationException(sprintf('Migration version %s is not found!', $version));
         }
 
         $currentMigrationVersion = $this->migrationVersionTable->getCurrentVersion();
-        if (!is_null($version) && $version == $currentMigrationVersion && !$force) {
+        if (!is_null($version) && $version == $currentMigrationVersion && !$force && !$down) {
             throw new MigrationException(sprintf('Migration version %s is current version!', $version));
         }
 
-        if ($version && $force) {
+        if ($version && ($down || $force)) {
             foreach ($migrations as $migration) {
                 if ($migration['version'] == $version) {
                     // if existing migration is forced to apply - delete its information from migrated
@@ -208,19 +208,22 @@ class Migration implements ServiceLocatorAwareInterface
     }
 
     /**
-     * @param bool $all
+     * @param bool $force
+     * @param bool $down
      * @return \ArrayIterator
      */
-    public function getMigrationClasses($all = false)
+    public function getMigrationClasses($force = false, $down = false)
     {
         $classes = new \ArrayIterator();
 
         $iterator = new \GlobIterator(sprintf('%s/Version*.php', $this->migrationsDir), \FilesystemIterator::KEY_AS_FILENAME);
+
         foreach ($iterator as $item) {
             /** @var $item \SplFileInfo */
             if (preg_match('/(Version(\d+))\.php/', $item->getFilename(), $matches)) {
                 $applied = $this->migrationVersionTable->applied($matches[2]);
-                if ($all || !$applied) {
+
+                if ($force || !$applied || $down) {
                     $className = $this->migrationsNamespace . '\\' . $matches[1];
 
                     if (!class_exists($className))

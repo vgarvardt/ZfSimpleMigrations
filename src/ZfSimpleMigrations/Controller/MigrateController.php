@@ -95,7 +95,6 @@ class MigrateController extends AbstractActionController
         $force = $this->getRequest()->getParam('force');
         $down = $this->getRequest()->getParam('down');
         $fake = $this->getRequest()->getParam('fake');
-        $name = $this->getRequest()->getParam('name');
 
         if (is_null($version) && $force) {
             return "Can't force migration apply without migration version explicitly set.";
