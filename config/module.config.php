@@ -3,6 +3,7 @@
 return [
     'migrations' => [
         'default' => [
+            'prefix'=> '',
             'dir' => dirname(__FILE__) . '/../../../../migrations',
             'namespace' => 'ZfSimpleMigrations\Migrations',
             'show_log' => true,
