@@ -1,14 +1,12 @@
 <?php
 namespace ZfSimpleMigrations\Controller;
 
-use Zend\Mvc\Controller\AbstractActionController;
-use Zend\Mvc\Controller\AbstractConsoleController;
+use Zend\Mvc\Console\Controller\AbstractConsoleController;
+
 use Zend\Mvc\MvcEvent;
 use Zend\Console\Request as ConsoleRequest;
 use ZfSimpleMigrations\Library\Migration;
-use ZfSimpleMigrations\Library\MigrationException;
 use ZfSimpleMigrations\Library\MigrationSkeletonGenerator;
-use ZfSimpleMigrations\Library\OutputWriter;
 
 /**
  * Migration commands controller
@@ -50,9 +48,7 @@ class MigrateController extends AbstractConsoleController
     }
 
     /**
-     * Overridden only for PHPDoc return value for IDE code helpers
-     *
-     * @return ConsoleRequest
+     * @return \Zend\Stdlib\RequestInterface
      */
     public function getRequest()
     {

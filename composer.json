@@ -1,45 +1,45 @@
 {
-    "name"       : "adamiecradek/zf-simple-migrations",
-    "description": "Module for database migrations management.",
-    "type"       : "library",
-    "license"    : "BSD-3-Clause",
-    "keywords"   : [
-        "database",
-        "db",
-        "migrations",
-        "zf2"
-    ],
-    "homepage"   : "https://github.com/vgarvardt/ZfSimpleMigrations",
-    "authors"    : [
-        {
-            "name"    : "Vadim Knyzev",
-            "email"   : "vadim.knyzev@gmail.com",
-            "homepage": "http://vadim-knyzev.blogspot.com/"
-        },
-        {
-            "name"    : "Vladimir Garvardt",
-            "email"   : "vgarvardt@gmail.com",
-            "homepage": "http://itskrig.com/"
-        },
-        {
-            "name"    : "Radek Adamiec",
-            "email"   : "radek@adamiec.it",
-            "homepage": "http://adamiec.it"
-        }
-    ],
-    "require"    : {
-        "php"                        : ">=5.4",
-        "zendframework/zendframework": ">=2.2.0"
+  "name"       : "adamiecradek/zf-simple-migrations",
+  "description": "Module for database migrations management.",
+  "type"       : "library",
+  "license"    : "BSD-3-Clause",
+  "keywords"   : [
+    "database",
+    "db",
+    "migrations",
+    "zf2"
+  ],
+  "homepage"   : "https://github.com/vgarvardt/ZfSimpleMigrations",
+  "authors"    : [
+    {
+      "name"    : "Vadim Knyzev",
+      "email"   : "vadim.knyzev@gmail.com",
+      "homepage": "http://vadim-knyzev.blogspot.com/"
     },
-    "require-dev": {
-        "phpunit/phpunit": "4.6.*"
+    {
+      "name"    : "Vladimir Garvardt",
+      "email"   : "vgarvardt@gmail.com",
+      "homepage": "http://itskrig.com/"
     },
-    "autoload"   : {
-        "psr-0"   : {
-            "ZfSimpleMigrations": "src/"
-        },
-        "classmap": [
-            "./Module.php"
-        ]
+    {
+      "name"    : "Radek Adamiec",
+      "email"   : "radek@adamiec.it",
+      "homepage": "http://adamiec.it"
     }
+  ],
+  "require"    : {
+    "php"                           : ">=5.4",
+    "zendframework/zend-mvc-console": "^1.1.9"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "4.6.*"
+  },
+  "autoload"   : {
+    "psr-0"   : {
+      "ZfSimpleMigrations": "src/"
+    },
+    "classmap": [
+      "./Module.php"
+    ]
+  }
 }
