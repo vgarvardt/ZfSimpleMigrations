@@ -64,9 +64,4 @@ return [
             'ZfSimpleMigrations\Controller\Migrate' => 'ZfSimpleMigrations\\Controller\\MigrateControllerFactory'
         ],
     ],
-    'view_manager' => [
-        'template_path_stack' => [
-            __DIR__ . '/../view',
-        ],
-    ],
 ];
