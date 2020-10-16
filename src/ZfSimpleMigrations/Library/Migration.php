@@ -314,7 +314,7 @@ class Migration implements ServiceLocatorAwareInterface
         } catch (\Exception $e) {
             $this->connection->rollback();
             $msg = sprintf('%s; File: %s; Line #%d', $e->getMessage(), $e->getFile(), $e->getLine());
-            throw new MigrationException($msg, $e->getCode(), $e);
+            throw new MigrationException($msg);
         }
     }
 
