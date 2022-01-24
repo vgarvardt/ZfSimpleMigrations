@@ -1,0 +1,30 @@
+name: Testing
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v2
+
+      - name: Setup PHP
+        uses: ./.github/actions/setup-php
+
+      - name: Run unit tests
+        run: phpdbg -qrr vendor/bin/phpunit -c ./phpunit.xml --coverage-clover="./coverage.xml" --coverage-text="php://stdout" --log-junit="./junit-logfile.xml"
+
+#      - name: Upload coverage to Codecov
+#        uses: codecov/codecov-action@v1
+#        if: success()
+#        with:
+#          file: ./coverage.txt
+#          fail_ci_if_error: false
