@@ -16,8 +16,7 @@ class MigrationSkeletonGeneratorAbstractFactoryTest extends \PHPUnit_Framework_T
     public function setUp()
     {
         parent::setUp();
-        $this->serviceManager = new ServiceManager(new Config(
-            ['allow_override' => true]));
+        $this->serviceManager = new ServiceManager(new Config(['allow_override' => true]));
         $this->serviceManager->setService('Config', [
             'migrations' => [
                 'foo' => [
@@ -76,7 +75,7 @@ class MigrationSkeletonGeneratorAbstractFactoryTest extends \PHPUnit_Framework_T
         $this->assertInstanceOf(
             MigrationSkeletonGenerator::class,
             $instance,
-            "factory should return an instance of " . MigrationSkeletonGenerator::class . " when asked by \$name"
+            "factory should return an instance of " . MigrationSkeletonGenerator::class . " when asked by name"
         );
 
         $instance2 = $factory->createServiceWithName(
@@ -87,7 +86,7 @@ class MigrationSkeletonGeneratorAbstractFactoryTest extends \PHPUnit_Framework_T
         $this->assertInstanceOf(
             MigrationSkeletonGenerator::class,
             $instance2,
-            "factory should return an instance of " . MigrationSkeletonGenerator::class . " when asked by \$requestedName"
+            "factory should return an instance of " . MigrationSkeletonGenerator::class . " when asked by requestedName"
         );
     }
 

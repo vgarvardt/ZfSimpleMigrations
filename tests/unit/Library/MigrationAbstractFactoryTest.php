@@ -34,12 +34,18 @@ class MigrationAbstractFactoryTest extends \PHPUnit_Framework_TestCase
                 ]
             ]
         ]);
-        $this->serviceManager->setService('migrations.versiontable.fooDb',
-            $this->getMock(MigrationVersionTable::class, [], [], '', false));
-        $this->serviceManager->setService('console',
-            $this->getMock(Console::class, [], [], '', false));
-        $this->serviceManager->setService('fooDb',
-            $adapter = $this->getMock(Adapter::class, [], [], '', false));
+        $this->serviceManager->setService(
+            'migrations.versiontable.fooDb',
+            $this->getMock(MigrationVersionTable::class, [], [], '', false)
+        );
+        $this->serviceManager->setService(
+            'console',
+            $this->getMock(Console::class, [], [], '', false)
+        );
+        $this->serviceManager->setService(
+            'fooDb',
+            $adapter = $this->getMock(Adapter::class, [], [], '', false)
+        );
 
         $adapter->expects($this->any())
             ->method('getPlatform')
@@ -50,23 +56,37 @@ class MigrationAbstractFactoryTest extends \PHPUnit_Framework_TestCase
         $driver->expects($this->any())
             ->method('getConnection')
             ->willReturn($this->getMock(Connection::class, [], [], '', false));
-
     }
 
     public function testItIndicatesWhatServicesItCreates()
     {
         $factory = new MigrationAbstractFactory();
-        $this->assertTrue($factory->canCreateServiceWithName($this->serviceManager,
-            'migrations.migration.foo', 'asdf'),
-            "should indicate it provides service for \$name");
+        $this->assertTrue(
+            $factory->canCreateServiceWithName(
+                $this->serviceManager,
+                'migrations.migration.foo',
+                'asdf'
+            ),
+            "should indicate it provides service for \$name"
+        );
 
-        $this->assertTrue($factory->canCreateServiceWithName($this->serviceManager,
-            'asdf', 'migrations.migration.foo'),
-            "should indicate it provides service for \$requestedName");
+        $this->assertTrue(
+            $factory->canCreateServiceWithName(
+                $this->serviceManager,
+                'asdf',
+                'migrations.migration.foo'
+            ),
+            "should indicate it provides service for requestedName"
+        );
 
-        $this->assertFalse($factory->canCreateServiceWithName($this->serviceManager,
-            'asdf', 'asdf'),
-            "should indicate it does not provide service for \$name or \$requestedName");
+        $this->assertFalse(
+            $factory->canCreateServiceWithName(
+                $this->serviceManager,
+                'asdf',
+                'asdf'
+            ),
+            "should indicate it does not provide service for name or requestedName"
+        );
     }
 
     public function testItReturnsAMigration()
@@ -82,7 +102,7 @@ class MigrationAbstractFactoryTest extends \PHPUnit_Framework_TestCase
         $this->assertInstanceOf(
             Migration::class,
             $instance,
-            "factory should return an instance of " . Migration::class . " when asked by \$name"
+            "factory should return an instance of " . Migration::class . " when asked by name"
         );
 
         $instance2 = $factory->createServiceWithName(
@@ -90,12 +110,14 @@ class MigrationAbstractFactoryTest extends \PHPUnit_Framework_TestCase
             'asdf',
             'migrations.migration.foo'
         );
-        $this->assertInstanceOf(Migration::class, $instance2,
-            "factory should return an instance of "
-            . Migration::class . " when asked by \$requestedName");
+        $this->assertInstanceOf(
+            Migration::class,
+            $instance2,
+            "factory should return an instance of " . Migration::class . " when asked by requestedName"
+        );
     }
 
-    public function test_it_injects_an_output_writer()
+    public function testItInjectsAnOutputWriter()
     {
         $this->serviceManager->setService('Config', [
             'migrations' => [
@@ -124,7 +146,7 @@ class MigrationAbstractFactoryTest extends \PHPUnit_Framework_TestCase
     /**
      * @expectedException \RuntimeException
      */
-    public function test_it_complains_if_named_migration_not_configured()
+    public function testItComplainsIfNamedMigrationNotConfigured()
     {
         $factory = new MigrationAbstractFactory();
         $factory->createServiceWithName(
