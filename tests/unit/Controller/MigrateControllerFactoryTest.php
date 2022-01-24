@@ -8,7 +8,6 @@
 
 namespace ZfSimpleMigrations\UnitTest\Controller;
 
-
 use Zend\Mvc\Application;
 use Zend\Mvc\Controller\ControllerManager;
 use Zend\Mvc\MvcEvent;
@@ -22,36 +21,43 @@ use ZfSimpleMigrations\Library\MigrationSkeletonGenerator;
 class MigrateControllerFactoryTest extends \PHPUnit_Framework_TestCase
 {
     /** @var  ServiceManager */
-    protected $service_manager;
+    protected $serviceManager;
 
     protected function setUp()
     {
         parent::setUp();
-        $this->service_manager = new ServiceManager();
-        $this->service_manager->setService('migrations.migration.foo',
-            $this->getMock(Migration::class, [], [], '', false));
-        $this->service_manager->setService('migrations.skeleton-generator.foo',
-            $this->getMock(MigrationSkeletonGenerator::class, [], [], '', false));
-        $this->service_manager->setService('Application',
-            $application = $this->getMock(Application::class, [], [], '', false));
+
+        $this->serviceManager = new ServiceManager();
+        $this->serviceManager->setService(
+            'migrations.migration.foo',
+            $this->getMock(Migration::class, [], [], '', false)
+        );
+        $this->serviceManager->setService(
+            'migrations.skeleton-generator.foo',
+            $this->getMock(MigrationSkeletonGenerator::class, [], [], '', false)
+        );
+        $this->serviceManager->setService(
+            'Application',
+            $application = $this->getMock(Application::class, [], [], '', false)
+        );
 
         $application->expects($this->any())
             ->method('getMvcEvent')
             ->willReturn($mvcEvent = new MvcEvent());
-        $mvcEvent->setRouteMatch($route_match = new RouteMatch(['name' => 'foo']));
-
+        $mvcEvent->setRouteMatch(new RouteMatch(['name' => 'foo']));
     }
 
-
-    public function test_it_returns_a_controller()
+    public function testItReturnsAController()
     {
-        $controller_manager = new ControllerManager();
-        $controller_manager->setServiceLocator($this->service_manager);
+        $controllerManager = new ControllerManager($this->serviceManager);
 
         $factory = new MigrateControllerFactory();
-        $instance = $factory->createService($controller_manager);
+        $instance = $factory->createService($controllerManager);
 
-        $this->assertInstanceOf(MigrateController::class, $instance,
-            "factory should return an instance of " . MigrateController::class);
+        $this->assertInstanceOf(
+            MigrateController::class,
+            $instance,
+            'factory should return an instance of ' . MigrateController::class
+        );
     }
 }
