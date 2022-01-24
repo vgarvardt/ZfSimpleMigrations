@@ -25,6 +25,9 @@ jobs:
         env:
           fail-fast: true
 
+      - name: Install PHP deps
+        run: composer install
+
       - name: Run unit tests
         run: phpdbg -qrr vendor/bin/phpunit -c ./phpunit.xml --coverage-clover="./coverage.xml" --coverage-text="php://stdout" --log-junit="./junit-logfile.xml"
 
