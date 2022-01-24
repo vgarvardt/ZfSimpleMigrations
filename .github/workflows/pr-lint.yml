@@ -21,6 +21,9 @@ jobs:
           # Full git history is needed to get a proper list of changed files within `super-linter`
           fetch-depth: 0
 
+      - name: Setup PHP
+        uses: ./.github/actions/setup-php
+
       - name: Lint Code Base
         uses: github/super-linter@v4
         env:
