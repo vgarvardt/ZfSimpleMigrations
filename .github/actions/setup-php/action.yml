@@ -4,7 +4,7 @@ inputs:
   composer-install:
     description: Install dependencies to teh pre-setup PHP environment
     required: false
-    default: "false"
+    default: "true"
 runs:
   using: composite
   steps:
