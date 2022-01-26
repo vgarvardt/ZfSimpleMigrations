@@ -1,15 +1,16 @@
 <?php
 
-namespace ZfSimpleMigrations\UnitTest\Library;
+namespace ZfSimpleMigrations\Library;
 
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
 use Zend\Mvc\Controller\ControllerManager;
 use Zend\ServiceManager\Config;
 use Zend\ServiceManager\ServiceManager;
-use ZfSimpleMigrations\Library\MigrationSkeletonGenerator;
-use ZfSimpleMigrations\Library\MigrationSkeletonGeneratorAbstractFactory;
 
+/**
+ * @group unit
+ */
 class MigrationSkeletonGeneratorAbstractFactoryTest extends TestCase
 {
     public function testItIndicatesWhatServicesItCreates()

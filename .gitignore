@@ -1,4 +1,4 @@
 .idea/
 vendor/
 composer.lock
-tests/integration/data/ignore/
+junit-logfile.xml

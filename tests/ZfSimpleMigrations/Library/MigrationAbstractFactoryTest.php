@@ -1,6 +1,6 @@
 <?php
 
-namespace ZfSimpleMigrations\UnitTest\Library;
+namespace ZfSimpleMigrations\Library;
 
 use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
@@ -13,11 +13,11 @@ use Zend\Db\Adapter\Platform\Sqlite;
 use Zend\Mvc\Controller\ControllerManager;
 use Zend\ServiceManager\Config;
 use Zend\ServiceManager\ServiceManager;
-use ZfSimpleMigrations\Library\Migration;
-use ZfSimpleMigrations\Library\MigrationAbstractFactory;
-use ZfSimpleMigrations\Library\OutputWriter;
 use ZfSimpleMigrations\Model\MigrationVersionTable;
 
+/**
+ * @group unit
+ */
 class MigrationAbstractFactoryTest extends TestCase
 {
     public function testItIndicatesWhatServicesItCreates()

@@ -7,7 +7,7 @@
  * 6/4/15 2:20 PM
  */
 
-namespace ZfSimpleMigrations\UnitTest\Controller;
+namespace ZfSimpleMigrations\Controller;
 
 use PHPUnit\Framework\TestCase;
 use Zend\Mvc\Application;
@@ -15,11 +15,12 @@ use Zend\Mvc\Controller\ControllerManager;
 use Zend\Mvc\MvcEvent;
 use Zend\Mvc\Router\Http\RouteMatch;
 use Zend\ServiceManager\ServiceManager;
-use ZfSimpleMigrations\Controller\MigrateController;
-use ZfSimpleMigrations\Controller\MigrateControllerFactory;
 use ZfSimpleMigrations\Library\Migration;
 use ZfSimpleMigrations\Library\MigrationSkeletonGenerator;
 
+/**
+ * @group unit
+ */
 class MigrateControllerFactoryTest extends TestCase
 {
     public function testItReturnsAController()

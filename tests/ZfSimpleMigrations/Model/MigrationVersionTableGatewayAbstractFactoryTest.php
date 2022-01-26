@@ -1,31 +1,26 @@
 <?php
 
-/**
- * @category WebPT
- * @copyright Copyright (c) 2015 WebPT, INC
- * @author jgiberson
- * 6/4/15 2:54 PM
- */
-
-namespace ZfSimpleMigrations\UnitTest\Model;
+namespace ZfSimpleMigrations\Model;
 
 use PHPUnit\Framework\TestCase;
+use Zend\Db\Adapter\Adapter;
 use Zend\Db\TableGateway\TableGateway;
 use Zend\ServiceManager\ServiceManager;
-use ZfSimpleMigrations\Model\MigrationVersionTable;
-use ZfSimpleMigrations\Model\MigrationVersionTableAbstractFactory;
 
-class MigrationVersionTableAbstractFactoryTest extends TestCase
+/**
+ * @group unit
+ */
+class MigrationVersionTableGatewayAbstractFactoryTest extends TestCase
 {
     public function testItIndicatesWhatServicesItCreates()
     {
         $serviceManager = $this->buildServiceManager();
 
-        $factory = new MigrationVersionTableAbstractFactory();
+        $factory = new MigrationVersionTableGatewayAbstractFactory();
         $this->assertTrue(
             $factory->canCreateServiceWithName(
                 $serviceManager,
-                'migrations.versiontable.foo',
+                'migrations.versiontablegateway.foo',
                 'asdf'
             ),
             "should indicate it provides service for \$name"
@@ -35,7 +30,7 @@ class MigrationVersionTableAbstractFactoryTest extends TestCase
             $factory->canCreateServiceWithName(
                 $serviceManager,
                 'asdf',
-                'migrations.versiontable.foo'
+                'migrations.versiontablegateway.foo'
             ),
             "should indicate it provides service for \$requestedName"
         );
@@ -50,34 +45,34 @@ class MigrationVersionTableAbstractFactoryTest extends TestCase
         );
     }
 
-    public function testItReturnsAMigrationVersionTable()
+    public function testItReturnsATableGateway()
     {
         $serviceManager = $this->buildServiceManager();
 
-        $factory = new MigrationVersionTableAbstractFactory();
-        $instance = $factory->createServiceWithName($serviceManager, 'migrations.versiontable.foo', 'asdf');
+        $factory = new MigrationVersionTableGatewayAbstractFactory();
+        $instance = $factory->createServiceWithName($serviceManager, 'migrations.versiontablegateway.foo', 'asdf');
         $this->assertInstanceOf(
-            MigrationVersionTable::class,
+            TableGateway::class,
             $instance,
-            "factory should return an instance of " . MigrationVersionTable::class . " when asked by \$name"
+            "factory should return an instance of " . TableGateway::class . " when asked by \$name"
         );
 
-        $instance2 = $factory->createServiceWithName($serviceManager, 'asdf', 'migrations.versiontable.foo');
+        $instance2 = $factory->createServiceWithName($serviceManager, 'asdf', 'migrations.versiontablegateway.foo');
         $this->assertInstanceOf(
-            MigrationVersionTable::class,
+            TableGateway::class,
             $instance2,
-            "factory should return an instance of " . MigrationVersionTable::class . " when asked by \$requestedName"
+            "factory should return an instance of " . TableGateway::class . " when asked by \$requestedName"
         );
     }
 
     private function buildServiceManager(): ServiceManager
     {
-        $tableGateway = $this->prophesize(TableGateway::class);
+        $adapter = $this->prophesize(Adapter::class);
 
         $serviceManager = new ServiceManager();
         $serviceManager->setService(
-            'migrations.versiontablegateway.foo',
-            $tableGateway->reveal()
+            'foo',
+            $adapter->reveal()
         );
 
         return $serviceManager;

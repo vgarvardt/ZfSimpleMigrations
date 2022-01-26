@@ -1,12 +1,12 @@
 <?php
+
 /**
  * User: Jeremy
  * Date: 8/8/2015
  * Time: 11:53 AM
  */
 
-namespace ApplyMigration;
-
+namespace ZfSimpleMigrations\Library\ApplyMigration;
 
 use Zend\Db\Adapter\AdapterAwareInterface;
 use Zend\Db\Adapter\AdapterAwareTrait;

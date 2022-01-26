@@ -1,24 +1,27 @@
 <?php
+
 /**
  * User: Jeremy
  * Date: 8/8/2015
  * Time: 10:06 AM
  */
 
-namespace ZfSimpleMigrations\IntegrationTest\Library;
-
+namespace ZfSimpleMigrations\Library;
 
 use ArrayObject;
+use PHPUnit\Framework\TestCase;
 use Zend\Db\Adapter\Adapter;
 use Zend\Db\Metadata\Metadata;
 use Zend\Db\ResultSet\ResultSet;
 use Zend\Db\Sql\Ddl\DropTable;
 use Zend\Db\TableGateway\TableGateway;
-use ZfSimpleMigrations\Library\Migration;
 use ZfSimpleMigrations\Model\MigrationVersion;
 use ZfSimpleMigrations\Model\MigrationVersionTable;
 
-class MigrationTest extends \PHPUnit_Framework_TestCase
+/**
+ * @group integration
+ */
+class MigrationTest extends TestCase
 {
     /** @var  Adapter */
     private $adapter;
@@ -31,7 +34,7 @@ class MigrationTest extends \PHPUnit_Framework_TestCase
         $driverConfig = [
             'driver' => getenv('db_type'),
             // sqlite handling (if necessary)
-            'database' => str_replace('%BASE_DIR%', __DIR__ . '/../../../', getenv('db_name')),
+            'database' => str_replace('%BASE_DIR%', __DIR__ . '/../../ZfSimpleMigrations/', getenv('db_name')),
             'username' => getenv('db_username'),
             'password' => getenv('db_password'),
             'hostname' => getenv('db_host'),
@@ -45,7 +48,7 @@ class MigrationTest extends \PHPUnit_Framework_TestCase
             'namespace' => 'ApplyMigration'
         ];
 
-       $this->adapter = $adapter = new Adapter($driverConfig);
+        $this->adapter = $adapter = new Adapter($driverConfig);
 
         $metadata = new Metadata($adapter);
         $tableNames = $metadata->getTableNames();
@@ -54,8 +57,8 @@ class MigrationTest extends \PHPUnit_Framework_TestCase
             'test',
             MigrationVersion::TABLE_NAME
         ];
-        foreach($drop_if_exists as $table) {
-            if(in_array($table,$tableNames)){
+        foreach ($drop_if_exists as $table) {
+            if (in_array($table, $tableNames)) {
                 // ensure db is in expected state
                 $drop = new DropTable($table);
                 $adapter->query($drop->getSqlString($adapter->getPlatform()));
@@ -74,7 +77,8 @@ class MigrationTest extends \PHPUnit_Framework_TestCase
         $this->migration = new Migration($adapter, $config, $table);
     }
 
-    public function test_apply_migration() {
+    public function test_apply_migration()
+    {
         $this->migration->migrate('01');
 
         $metadata = new Metadata($this->adapter);

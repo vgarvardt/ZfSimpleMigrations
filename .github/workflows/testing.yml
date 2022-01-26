@@ -20,7 +20,7 @@ jobs:
         uses: ./.github/actions/setup-php
 
       - name: Run unit tests
-        run: phpdbg -qrr vendor/bin/phpunit -c ./phpunit.xml --coverage-clover="./coverage.xml" --coverage-text="php://stdout" --log-junit="./junit-logfile.xml"
+        run: phpdbg -qrr vendor/bin/phpunit -c ./phpunit.xml --group "unit" --coverage-clover="./coverage.xml" --coverage-text="php://stdout" --log-junit="./junit-logfile.xml"
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v2
