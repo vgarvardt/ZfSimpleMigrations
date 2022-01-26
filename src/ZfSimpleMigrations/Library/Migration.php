@@ -290,7 +290,7 @@ class Migration implements ServiceLocatorAwareInterface
         $this->connection->beginTransaction();
 
         try {
-            /** @var $migrationObject AbstractMigration */
+            /** @var AbstractMigration $migrationObject */
             $migrationObject = new $migration['class']($this->metadata, $this->outputWriter);
 
             if ($migrationObject instanceof ServiceLocatorAwareInterface) {

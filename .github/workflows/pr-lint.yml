@@ -31,3 +31,5 @@ jobs:
           DEFAULT_BRANCH: master
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           VALIDATE_PHP_PSALM: false
+          # TODO: should be enabled back one day
+          VALIDATE_PHP_PHPSTAN: false

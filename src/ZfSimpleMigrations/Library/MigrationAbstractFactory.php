@@ -55,11 +55,12 @@ class MigrationAbstractFactory implements AbstractFactoryInterface
         $migrationConfig = $config['migrations'][$name];
 
         $adapterName = $migrationConfig['adapter'] ?: Adapter::class;
-        /** @var $adapter Adapter */
+        /** @var Adapter $adapter */
         $adapter = $serviceLocator->get($adapterName);
 
         $output = null;
         if (isset($migrationConfig['show_log']) && $migrationConfig['show_log']) {
+            /** @var OutputWriter $console */
             $console = $serviceLocator->get('console');
             $output = new OutputWriter(function ($message) use ($console) {
                 $console->write($message . "\n");
