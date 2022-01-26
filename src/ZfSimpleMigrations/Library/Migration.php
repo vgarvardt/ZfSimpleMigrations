@@ -64,8 +64,12 @@ class Migration implements ServiceLocatorAwareInterface
      * @param OutputWriter $writer
      * @throws MigrationException
      */
-    public function __construct(Adapter $adapter, array $config, MigrationVersionTable $migrationVersionTable, OutputWriter $writer = null)
-    {
+    public function __construct(
+        Adapter $adapter,
+        array $config,
+        MigrationVersionTable $migrationVersionTable,
+        OutputWriter $writer = null
+    ) {
         $this->adapter = $adapter;
         $this->metadata = new Metadata($this->adapter);
         $this->connection = $this->adapter->getDriver()->getConnection();
@@ -74,11 +78,13 @@ class Migration implements ServiceLocatorAwareInterface
         $this->migrationVersionTable = $migrationVersionTable;
         $this->outputWriter = is_null($writer) ? new OutputWriter() : $writer;
 
-        if (is_null($this->migrationsDir))
+        if (is_null($this->migrationsDir)) {
             throw new MigrationException('Migrations directory not set!');
+        }
 
-        if (is_null($this->migrationsNamespace))
+        if (is_null($this->migrationsNamespace)) {
             throw new MigrationException('Unknown namespaces!');
+        }
 
         if (!is_dir($this->migrationsDir)) {
             if (!mkdir($this->migrationsDir, 0775)) {
@@ -144,12 +150,15 @@ class Migration implements ServiceLocatorAwareInterface
                 if ($migration['version'] == $version) {
                     // if existing migration is forced to apply - delete its information from migrated
                     // to avoid duplicate key error
-                    if (!$down) $this->migrationVersionTable->delete($migration['version']);
+                    if (!$down) {
+                        $this->migrationVersionTable->delete($migration['version']);
+                    }
                     $this->applyMigration($migration, $down, $dryRun);
                     break;
                 }
             }
-            // target migration version not set or target version is greater than last applied migration -> apply migrations
+            // target migration version not set or target version is greater than
+            // the last applied migration -> apply migrations
         } elseif (is_null($version) || (!is_null($version) && $version > $currentMigrationVersion)) {
             foreach ($migrations as $migration) {
                 if ($migration['version'] > $currentMigrationVersion) {
@@ -198,7 +207,9 @@ class Migration implements ServiceLocatorAwareInterface
     public function hasMigrationVersions(ArrayIterator $migrations, int $version): bool
     {
         foreach ($migrations as $migration) {
-            if ($migration['version'] == $version) return true;
+            if ($migration['version'] == $version) {
+                return true;
+            }
         }
 
         return false;
@@ -230,7 +241,8 @@ class Migration implements ServiceLocatorAwareInterface
     {
         $classes = new ArrayIterator();
 
-        $iterator = new GlobIterator(sprintf('%s/Version*.php', $this->migrationsDir), FilesystemIterator::KEY_AS_FILENAME);
+        $pattern = sprintf('%s/Version*.php', $this->migrationsDir);
+        $iterator = new GlobIterator($pattern, FilesystemIterator::KEY_AS_FILENAME);
         foreach ($iterator as $item) {
             /** @var $item SplFileInfo */
             if (preg_match('/(Version(\d+))\.php/', $item->getFilename(), $matches)) {
@@ -238,8 +250,9 @@ class Migration implements ServiceLocatorAwareInterface
                 if ($all || !$applied) {
                     $className = $this->migrationsNamespace . '\\' . $matches[1];
 
-                    if (!class_exists($className))
+                    if (!class_exists($className)) {
                         require_once $this->migrationsDir . '/' . $item->getFilename();
+                    }
 
                     if (class_exists($className)) {
                         $reflectionClass = new ReflectionClass($className);
@@ -306,8 +319,14 @@ class Migration implements ServiceLocatorAwareInterface
                 $migrationObject->setDbAdapter($this->adapter);
             }
 
-            $this->outputWriter->writeLine(sprintf("%sExecute migration class %s %s",
-                $dryRun ? '[DRY RUN] ' : '', $migration['class'], $down ? 'down' : 'up'));
+            $this->outputWriter->writeLine(
+                sprintf(
+                    '%sExecute migration class %s %s',
+                    $dryRun ? '[DRY RUN] ' : '',
+                    $migration['class'],
+                    $down ? 'down' : 'up'
+                )
+            );
 
             if (!$dryRun) {
                 $sqlList = $down ? $migrationObject->getDownSql() : $migrationObject->getUpSql();

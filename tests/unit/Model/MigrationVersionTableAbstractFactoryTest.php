@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @category WebPT
  * @copyright Copyright (c) 2015 WebPT, INC
@@ -16,7 +17,7 @@ use ZfSimpleMigrations\Model\MigrationVersionTableAbstractFactory;
 
 class MigrationVersionTableAbstractFactoryTest extends TestCase
 {
-    public function test_it_indicates_what_services_it_creates()
+    public function testItIndicatesWhatServicesItCreates()
     {
         $serviceManager = $this->buildServiceManager();
 
@@ -49,7 +50,7 @@ class MigrationVersionTableAbstractFactoryTest extends TestCase
         );
     }
 
-    public function test_it_returns_a_migration_version_table()
+    public function testItReturnsAMigrationVersionTable()
     {
         $serviceManager = $this->buildServiceManager();
 

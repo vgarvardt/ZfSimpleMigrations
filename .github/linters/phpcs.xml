@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<ruleset name="super-linter">
+    <description>The default coding standard for usage with GitHub Super-Linter. It just includes PSR12.</description>
+    <rule ref="PSR12">
+        <!-- TODO: remove this rule once min PHP version is bumped to PHP 7.1 -->
+        <exclude name="PSR12.Properties.ConstantVisibility"/>
+    </rule>
+</ruleset>
