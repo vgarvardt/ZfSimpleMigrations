@@ -1,9 +1,9 @@
 <?php
 
-
 namespace ZfSimpleMigrations\Library;
 
 use RuntimeException;
+use Zend\Db\Adapter\Adapter;
 use Zend\ServiceManager\AbstractFactoryInterface;
 use Zend\ServiceManager\AbstractPluginManager;
 use Zend\ServiceManager\ServiceLocatorInterface;
@@ -12,15 +12,16 @@ use ZfSimpleMigrations\Model\MigrationVersionTable;
 class MigrationAbstractFactory implements AbstractFactoryInterface
 {
     const FACTORY_PATTERN = '/migrations\.migration\.(.*)/';
+
     /**
      * Determine if we can create a service with name
      *
      * @param ServiceLocatorInterface $serviceLocator
-     * @param $name
-     * @param $requestedName
+     * @param string $name
+     * @param string $requestedName
      * @return bool
      */
-    public function canCreateServiceWithName(ServiceLocatorInterface $serviceLocator, $name, $requestedName)
+    public function canCreateServiceWithName(ServiceLocatorInterface $serviceLocator, $name, $requestedName): bool
     {
         return preg_match(self::FACTORY_PATTERN, $name) || preg_match(self::FACTORY_PATTERN, $requestedName);
     }
@@ -32,8 +33,9 @@ class MigrationAbstractFactory implements AbstractFactoryInterface
      * @param $name
      * @param $requestedName
      * @return Migration
+     * @throws MigrationException
      */
-    public function createServiceWithName(ServiceLocatorInterface $serviceLocator, $name, $requestedName)
+    public function createServiceWithName(ServiceLocatorInterface $serviceLocator, $name, $requestedName): Migration
     {
         if ($serviceLocator instanceof AbstractPluginManager) {
             $serviceLocator = $serviceLocator->getServiceLocator();
@@ -46,30 +48,29 @@ class MigrationAbstractFactory implements AbstractFactoryInterface
 
         $name = $matches[1];
 
-        if (! isset($config['migrations'][$name])) {
+        if (!isset($config['migrations'][$name])) {
             throw new RuntimeException(sprintf("`%s` does not exist in migrations configuration", $name));
         }
 
-        $migration_config = $config['migrations'][$name];
+        $migrationConfig = $config['migrations'][$name];
 
-        $adapter_name = isset($migration_config['adapter'])
-            ? $migration_config['adapter'] : 'Zend\Db\Adapter\Adapter';
-        /** @var $adapter \Zend\Db\Adapter\Adapter */
-        $adapter = $serviceLocator->get($adapter_name);
-
+        $adapterName = $migrationConfig['adapter'] ?: Adapter::class;
+        /** @var Adapter $adapter */
+        $adapter = $serviceLocator->get($adapterName);
 
         $output = null;
-        if (isset($migration_config['show_log']) && $migration_config['show_log']) {
+        if (isset($migrationConfig['show_log']) && $migrationConfig['show_log']) {
+            /** @var OutputWriter $console */
             $console = $serviceLocator->get('console');
             $output = new OutputWriter(function ($message) use ($console) {
                 $console->write($message . "\n");
             });
         }
 
-        /** @var MigrationVersionTable $version_table */
-        $version_table = $serviceLocator->get('migrations.versiontable.' . $adapter_name);
+        /** @var MigrationVersionTable $versionTable */
+        $versionTable = $serviceLocator->get('migrations.versiontable.' . $adapterName);
 
-        $migration = new Migration($adapter, $migration_config, $version_table, $output);
+        $migration = new Migration($adapter, $migrationConfig, $versionTable, $output);
 
         $migration->setServiceLocator($serviceLocator);
 

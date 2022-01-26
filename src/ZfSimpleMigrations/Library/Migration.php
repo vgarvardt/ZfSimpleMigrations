@@ -2,16 +2,25 @@
 
 namespace ZfSimpleMigrations\Library;
 
+use ArrayIterator;
+use Exception;
+use FilesystemIterator;
+use GlobIterator;
+use ReflectionClass;
+use ReflectionException;
+use ReflectionProperty;
+use RuntimeException;
+use SplFileInfo;
+use Throwable;
 use Zend\Db\Adapter\Adapter;
 use Zend\Db\Adapter\AdapterAwareInterface;
-use Zend\Db\Adapter\Driver\Pdo\Pdo;
+use Zend\Db\Adapter\Driver\ConnectionInterface;
 use Zend\Db\Adapter\Exception\InvalidQueryException;
 use Zend\Db\Metadata\Metadata;
 use Zend\Db\Sql\Ddl;
 use Zend\Db\Sql\Sql;
 use Zend\ServiceManager\ServiceLocatorAwareInterface;
 use Zend\ServiceManager\ServiceLocatorInterface;
-use ZfSimpleMigrations\Library\OutputWriter;
 use ZfSimpleMigrations\Model\MigrationVersion;
 use ZfSimpleMigrations\Model\MigrationVersionTable;
 
@@ -20,15 +29,19 @@ use ZfSimpleMigrations\Model\MigrationVersionTable;
  */
 class Migration implements ServiceLocatorAwareInterface
 {
+    /** @var string */
     protected $migrationsDir;
+    /** @var string */
     protected $migrationsNamespace;
+    /** @var Adapter */
     protected $adapter;
-    /**
-     * @var \Zend\Db\Adapter\Driver\ConnectionInterface
-     */
+    /** @var ConnectionInterface */
     protected $connection;
+    /** @var Metadata */
     protected $metadata;
+    /** @var MigrationVersionTable */
     protected $migrationVersionTable;
+    /** @var OutputWriter */
     protected $outputWriter;
 
     /**
@@ -37,22 +50,26 @@ class Migration implements ServiceLocatorAwareInterface
     protected $serviceLocator;
 
     /**
-     * @return \ZfSimpleMigrations\Library\OutputWriter
+     * @return OutputWriter
      */
-    public function getOutputWriter()
+    public function getOutputWriter(): OutputWriter
     {
         return $this->outputWriter;
     }
 
     /**
-     * @param \Zend\Db\Adapter\Adapter $adapter
+     * @param Adapter $adapter
      * @param array $config
-     * @param \ZfSimpleMigrations\Model\MigrationVersionTable $migrationVersionTable
+     * @param MigrationVersionTable $migrationVersionTable
      * @param OutputWriter $writer
      * @throws MigrationException
      */
-    public function __construct(Adapter $adapter, array $config, MigrationVersionTable $migrationVersionTable, OutputWriter $writer = null)
-    {
+    public function __construct(
+        Adapter $adapter,
+        array $config,
+        MigrationVersionTable $migrationVersionTable,
+        OutputWriter $writer = null
+    ) {
         $this->adapter = $adapter;
         $this->metadata = new Metadata($this->adapter);
         $this->connection = $this->adapter->getDriver()->getConnection();
@@ -61,11 +78,13 @@ class Migration implements ServiceLocatorAwareInterface
         $this->migrationVersionTable = $migrationVersionTable;
         $this->outputWriter = is_null($writer) ? new OutputWriter() : $writer;
 
-        if (is_null($this->migrationsDir))
+        if (is_null($this->migrationsDir)) {
             throw new MigrationException('Migrations directory not set!');
+        }
 
-        if (is_null($this->migrationsNamespace))
+        if (is_null($this->migrationsNamespace)) {
             throw new MigrationException('Unknown namespaces!');
+        }
 
         if (!is_dir($this->migrationsDir)) {
             if (!mkdir($this->migrationsDir, 0775)) {
@@ -91,7 +110,7 @@ class Migration implements ServiceLocatorAwareInterface
 
         try {
             $this->adapter->query($sql->getSqlStringForSqlObject($table), Adapter::QUERY_MODE_EXECUTE);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             // currently there are no db-independent way to check if table exists
             // so we assume that table exists when we catch exception
         }
@@ -100,7 +119,7 @@ class Migration implements ServiceLocatorAwareInterface
     /**
      * @return int
      */
-    public function getCurrentVersion()
+    public function getCurrentVersion(): int
     {
         return $this->migrationVersionTable->getCurrentVersion();
     }
@@ -109,10 +128,11 @@ class Migration implements ServiceLocatorAwareInterface
      * @param int $version target migration version, if not set all not applied available migrations will be applied
      * @param bool $force force apply migration
      * @param bool $down rollback migration
-     * @param bool $fake
+     * @param bool $dryRun
      * @throws MigrationException
+     * @throws ReflectionException
      */
-    public function migrate($version = null, $force = false, $down = false, $fake = false)
+    public function migrate($version = null, bool $force = false, bool $down = false, bool $dryRun = false)
     {
         $migrations = $this->getMigrationClasses($force);
 
@@ -130,17 +150,20 @@ class Migration implements ServiceLocatorAwareInterface
                 if ($migration['version'] == $version) {
                     // if existing migration is forced to apply - delete its information from migrated
                     // to avoid duplicate key error
-                    if (!$down) $this->migrationVersionTable->delete($migration['version']);
-                    $this->applyMigration($migration, $down, $fake);
+                    if (!$down) {
+                        $this->migrationVersionTable->delete($migration['version']);
+                    }
+                    $this->applyMigration($migration, $down, $dryRun);
                     break;
                 }
             }
-            // target migration version not set or target version is greater than last applied migration -> apply migrations
+            // target migration version not set or target version is greater than
+            // the last applied migration -> apply migrations
         } elseif (is_null($version) || (!is_null($version) && $version > $currentMigrationVersion)) {
             foreach ($migrations as $migration) {
                 if ($migration['version'] > $currentMigrationVersion) {
                     if (is_null($version) || (!is_null($version) && $version >= $migration['version'])) {
-                        $this->applyMigration($migration, false, $fake);
+                        $this->applyMigration($migration, false, $dryRun);
                     }
                 }
             }
@@ -149,17 +172,17 @@ class Migration implements ServiceLocatorAwareInterface
             $migrationsByDesc = $this->sortMigrationsByVersionDesc($migrations);
             foreach ($migrationsByDesc as $migration) {
                 if ($migration['version'] > $version && $migration['version'] <= $currentMigrationVersion) {
-                    $this->applyMigration($migration, true, $fake);
+                    $this->applyMigration($migration, true, $dryRun);
                 }
             }
         }
     }
 
     /**
-     * @param \ArrayIterator $migrations
-     * @return \ArrayIterator
+     * @param ArrayIterator $migrations
+     * @return ArrayIterator
      */
-    public function sortMigrationsByVersionDesc(\ArrayIterator $migrations)
+    public function sortMigrationsByVersionDesc(ArrayIterator $migrations): ArrayIterator
     {
         $sortedMigrations = clone $migrations;
 
@@ -177,24 +200,26 @@ class Migration implements ServiceLocatorAwareInterface
     /**
      * Check migrations classes existence
      *
-     * @param \ArrayIterator $migrations
+     * @param ArrayIterator $migrations
      * @param int $version
      * @return bool
      */
-    public function hasMigrationVersions(\ArrayIterator $migrations, $version)
+    public function hasMigrationVersions(ArrayIterator $migrations, int $version): bool
     {
         foreach ($migrations as $migration) {
-            if ($migration['version'] == $version) return true;
+            if ($migration['version'] == $version) {
+                return true;
+            }
         }
 
         return false;
     }
 
     /**
-     * @param \ArrayIterator $migrations
+     * @param ArrayIterator $migrations
      * @return int
      */
-    public function getMaxMigrationVersion(\ArrayIterator $migrations)
+    public function getMaxMigrationVersion(ArrayIterator $migrations): int
     {
         $versions = [];
         foreach ($migrations as $migration) {
@@ -209,29 +234,31 @@ class Migration implements ServiceLocatorAwareInterface
 
     /**
      * @param bool $all
-     * @return \ArrayIterator
+     * @return ArrayIterator
+     * @throws ReflectionException
      */
-    public function getMigrationClasses($all = false)
+    public function getMigrationClasses(bool $all = false): ArrayIterator
     {
-        $classes = new \ArrayIterator();
+        $classes = new ArrayIterator();
 
-        $iterator = new \GlobIterator(sprintf('%s/Version*.php', $this->migrationsDir), \FilesystemIterator::KEY_AS_FILENAME);
+        $pattern = sprintf('%s/Version*.php', $this->migrationsDir);
+        $iterator = new GlobIterator($pattern, FilesystemIterator::KEY_AS_FILENAME);
         foreach ($iterator as $item) {
-            /** @var $item \SplFileInfo */
+            /** @var $item SplFileInfo */
             if (preg_match('/(Version(\d+))\.php/', $item->getFilename(), $matches)) {
                 $applied = $this->migrationVersionTable->applied($matches[2]);
                 if ($all || !$applied) {
                     $className = $this->migrationsNamespace . '\\' . $matches[1];
 
-                    if (!class_exists($className))
-                        /** @noinspection PhpIncludeInspection */
+                    if (!class_exists($className)) {
                         require_once $this->migrationsDir . '/' . $item->getFilename();
+                    }
 
                     if (class_exists($className)) {
-                        $reflectionClass = new \ReflectionClass($className);
-                        $reflectionDescription = new \ReflectionProperty($className, 'description');
+                        $reflectionClass = new ReflectionClass($className);
+                        $reflectionDescription = new ReflectionProperty($className, 'description');
 
-                        if ($reflectionClass->implementsInterface('ZfSimpleMigrations\Library\MigrationInterface')) {
+                        if ($reflectionClass->implementsInterface(MigrationInterface::class)) {
                             $classes->append([
                                 'version' => $matches[2],
                                 'class' => $className,
@@ -255,17 +282,20 @@ class Migration implements ServiceLocatorAwareInterface
         return $classes;
     }
 
-    protected function applyMigration(array $migration, $down = false, $fake = false)
+    /**
+     * @throws MigrationException
+     */
+    protected function applyMigration(array $migration, $down = false, $dryRun = false)
     {
         $this->connection->beginTransaction();
 
         try {
-            /** @var $migrationObject AbstractMigration */
+            /** @var AbstractMigration $migrationObject */
             $migrationObject = new $migration['class']($this->metadata, $this->outputWriter);
 
             if ($migrationObject instanceof ServiceLocatorAwareInterface) {
                 if (is_null($this->serviceLocator)) {
-                    throw new \RuntimeException(
+                    throw new RuntimeException(
                         sprintf(
                             'Migration class %s requires a ServiceLocator, but there is no instance available.',
                             get_class($migrationObject)
@@ -278,7 +308,7 @@ class Migration implements ServiceLocatorAwareInterface
 
             if ($migrationObject instanceof AdapterAwareInterface) {
                 if (is_null($this->adapter)) {
-                    throw new \RuntimeException(
+                    throw new RuntimeException(
                         sprintf(
                             'Migration class %s requires an Adapter, but there is no instance available.',
                             get_class($migrationObject)
@@ -289,10 +319,16 @@ class Migration implements ServiceLocatorAwareInterface
                 $migrationObject->setDbAdapter($this->adapter);
             }
 
-            $this->outputWriter->writeLine(sprintf("%sExecute migration class %s %s",
-                $fake ? '[FAKE] ' : '', $migration['class'], $down ? 'down' : 'up'));
+            $this->outputWriter->writeLine(
+                sprintf(
+                    '%sExecute migration class %s %s',
+                    $dryRun ? '[DRY RUN] ' : '',
+                    $migration['class'],
+                    $down ? 'down' : 'up'
+                )
+            );
 
-            if (!$fake) {
+            if (!$dryRun) {
                 $sqlList = $down ? $migrationObject->getDownSql() : $migrationObject->getUpSql();
                 foreach ($sqlList as $sql) {
                     $this->outputWriter->writeLine("Execute query:\n\n" . $sql);
@@ -308,13 +344,10 @@ class Migration implements ServiceLocatorAwareInterface
             $this->connection->commit();
         } catch (InvalidQueryException $e) {
             $this->connection->rollback();
-            $previousMessage = $e->getPrevious() ? $e->getPrevious()->getMessage() : null;
-            $msg = sprintf('%s: "%s"; File: %s; Line #%d', $e->getMessage(), $previousMessage, $e->getFile(), $e->getLine());
-            throw new MigrationException($msg, $e->getCode(), $e);
-        } catch (\Exception $e) {
+            throw new MigrationException('Could not apply migration because of the invalid query', 0, $e);
+        } catch (Throwable $e) {
             $this->connection->rollback();
-            $msg = sprintf('%s; File: %s; Line #%d', $e->getMessage(), $e->getFile(), $e->getLine());
-            throw new MigrationException($msg, $e->getCode(), $e);
+            throw new MigrationException('Could not apply migration', 0, $e);
         }
     }
 
@@ -322,9 +355,9 @@ class Migration implements ServiceLocatorAwareInterface
      * Set service locator
      *
      * @param ServiceLocatorInterface $serviceLocator
-     * @return mixed
+     * @return $this
      */
-    public function setServiceLocator(ServiceLocatorInterface $serviceLocator)
+    public function setServiceLocator(ServiceLocatorInterface $serviceLocator): Migration
     {
         $this->serviceLocator = $serviceLocator;
 
@@ -336,7 +369,7 @@ class Migration implements ServiceLocatorAwareInterface
      *
      * @return ServiceLocatorInterface
      */
-    public function getServiceLocator()
+    public function getServiceLocator(): ServiceLocatorInterface
     {
         return $this->serviceLocator;
     }

@@ -1,7 +1,10 @@
 <?php
 
-namespace ZfSimpleMigrations\UnitTest\Library;
+namespace ZfSimpleMigrations\Library;
 
+use PHPUnit\Framework\TestCase;
+use Prophecy\Argument;
+use RuntimeException;
 use Zend\Console\Console;
 use Zend\Db\Adapter\Adapter;
 use Zend\Db\Adapter\Driver\Pdo\Connection;
@@ -10,60 +13,21 @@ use Zend\Db\Adapter\Platform\Sqlite;
 use Zend\Mvc\Controller\ControllerManager;
 use Zend\ServiceManager\Config;
 use Zend\ServiceManager\ServiceManager;
-use ZfSimpleMigrations\Library\Migration;
-use ZfSimpleMigrations\Library\MigrationAbstractFactory;
-use ZfSimpleMigrations\Library\OutputWriter;
 use ZfSimpleMigrations\Model\MigrationVersionTable;
 
-class MigrationAbstractFactoryTest extends \PHPUnit_Framework_TestCase
+/**
+ * @group unit
+ */
+class MigrationAbstractFactoryTest extends TestCase
 {
-    /** @var  ServiceManager */
-    protected $serviceManager;
-
-    public function setUp()
-    {
-        parent::setUp();
-        $this->serviceManager = new ServiceManager(new Config([
-            'allow_override' => true]));
-        $this->serviceManager->setService('Config', [
-            'migrations' => [
-                'foo' => [
-                    'dir' => __DIR__,
-                    'namespace' => 'Foo',
-                    'adapter' => 'fooDb'
-                ]
-            ]
-        ]);
-        $this->serviceManager->setService(
-            'migrations.versiontable.fooDb',
-            $this->getMock(MigrationVersionTable::class, [], [], '', false)
-        );
-        $this->serviceManager->setService(
-            'console',
-            $this->getMock(Console::class, [], [], '', false)
-        );
-        $this->serviceManager->setService(
-            'fooDb',
-            $adapter = $this->getMock(Adapter::class, [], [], '', false)
-        );
-
-        $adapter->expects($this->any())
-            ->method('getPlatform')
-            ->willReturn(new Sqlite());
-        $adapter->expects($this->any())
-            ->method('getDriver')
-            ->willReturn($driver = $this->getMock(Pdo::class, [], [], '', false));
-        $driver->expects($this->any())
-            ->method('getConnection')
-            ->willReturn($this->getMock(Connection::class, [], [], '', false));
-    }
-
     public function testItIndicatesWhatServicesItCreates()
     {
+        $serviceManager = $this->buildServiceManager(false);
+
         $factory = new MigrationAbstractFactory();
         $this->assertTrue(
             $factory->canCreateServiceWithName(
-                $this->serviceManager,
+                $serviceManager,
                 'migrations.migration.foo',
                 'asdf'
             ),
@@ -72,7 +36,7 @@ class MigrationAbstractFactoryTest extends \PHPUnit_Framework_TestCase
 
         $this->assertTrue(
             $factory->canCreateServiceWithName(
-                $this->serviceManager,
+                $serviceManager,
                 'asdf',
                 'migrations.migration.foo'
             ),
@@ -81,7 +45,7 @@ class MigrationAbstractFactoryTest extends \PHPUnit_Framework_TestCase
 
         $this->assertFalse(
             $factory->canCreateServiceWithName(
-                $this->serviceManager,
+                $serviceManager,
                 'asdf',
                 'asdf'
             ),
@@ -91,7 +55,10 @@ class MigrationAbstractFactoryTest extends \PHPUnit_Framework_TestCase
 
     public function testItReturnsAMigration()
     {
-        $controllerManager = new ControllerManager($this->serviceManager);
+        $serviceManager = $this->buildServiceManager(true);
+
+        $controllerManager = new ControllerManager();
+        $controllerManager->setServiceLocator($serviceManager);
 
         $factory = new MigrationAbstractFactory();
         $instance = $factory->createServiceWithName(
@@ -106,7 +73,7 @@ class MigrationAbstractFactoryTest extends \PHPUnit_Framework_TestCase
         );
 
         $instance2 = $factory->createServiceWithName(
-            $this->serviceManager,
+            $serviceManager,
             'asdf',
             'migrations.migration.foo'
         );
@@ -119,7 +86,9 @@ class MigrationAbstractFactoryTest extends \PHPUnit_Framework_TestCase
 
     public function testItInjectsAnOutputWriter()
     {
-        $this->serviceManager->setService('Config', [
+        $serviceManager = $this->buildServiceManager(true);
+
+        $serviceManager->setService('Config', [
             'migrations' => [
                 'foo' => [
                     'dir' => __DIR__,
@@ -131,7 +100,7 @@ class MigrationAbstractFactoryTest extends \PHPUnit_Framework_TestCase
         ]);
         $factory = new MigrationAbstractFactory();
         $instance = $factory->createServiceWithName(
-            $this->serviceManager,
+            $serviceManager,
             'migrations.migration.foo',
             'asdf'
         );
@@ -143,16 +112,70 @@ class MigrationAbstractFactoryTest extends \PHPUnit_Framework_TestCase
         );
     }
 
-    /**
-     * @expectedException \RuntimeException
-     */
     public function testItComplainsIfNamedMigrationNotConfigured()
     {
+        $serviceManager = $this->buildServiceManager(false);
+        $this->expectException(RuntimeException::class);
+
         $factory = new MigrationAbstractFactory();
         $factory->createServiceWithName(
-            $this->serviceManager,
+            $serviceManager,
             'migrations.migration.bar',
             'asdf'
         );
+    }
+
+    private function buildServiceManager(bool $expectVersionTableQuery): ServiceManager
+    {
+        $migrationVersionTable = $this->prophesize(MigrationVersionTable::class);
+        $console = $this->prophesize(Console::class);
+        $adapter = $this->prophesize(Adapter::class);
+        $driver = $this->prophesize(Pdo::class);
+        $connection = $this->prophesize(Connection::class);
+
+        if ($expectVersionTableQuery) {
+            $sqlite = new Sqlite();
+
+            $driver->getConnection()
+                ->shouldBeCalled()
+                ->willReturn($connection->reveal());
+
+            $adapter->getCurrentSchema()
+                ->shouldBeCalled()
+                ->willReturn('fooDb');
+            $adapter->getPlatform()
+                ->shouldBeCalled()
+                ->willReturn($sqlite);
+            $adapter->getDriver()
+                ->shouldBeCalled()
+                ->willReturn($driver->reveal());
+            $adapter->query(Argument::containingString('CREATE TABLE "migration_version"'), Adapter::QUERY_MODE_EXECUTE)
+                ->shouldBeCalled();
+        }
+
+        $serviceManager = new ServiceManager(new Config(['allow_override' => true]));
+        $serviceManager->setService('Config', [
+            'migrations' => [
+                'foo' => [
+                    'dir' => __DIR__,
+                    'namespace' => 'Foo',
+                    'adapter' => 'fooDb'
+                ]
+            ]
+        ]);
+        $serviceManager->setService(
+            'migrations.versiontable.fooDb',
+            $migrationVersionTable->reveal()
+        );
+        $serviceManager->setService(
+            'console',
+            $console->reveal()
+        );
+        $serviceManager->setService(
+            'fooDb',
+            $adapter->reveal()
+        );
+
+        return $serviceManager;
     }
 }
