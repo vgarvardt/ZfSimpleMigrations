@@ -24,13 +24,13 @@ class Version02 extends AbstractMigration implements AdapterAwareInterface
 
     public function up(MetadataInterface $schema)
     {
-        $create_test = new CreateTable('test');
-        $create_test->addColumn(new Integer('a'));
-        $sql = $create_test->getSqlString($this->adapter->getPlatform());
+        $createTable = new CreateTable('test');
+        $createTable->addColumn(new Integer('a'));
+        $sql = $createTable->getSqlString($this->adapter->getPlatform());
 
         // attempt to drop a non-existing table on second statement
-        $drop_fake = new DropTable('fake');
-        $sql .= '; ' . $drop_fake->getSqlString($this->adapter->getPlatform());
+        $dropTable = new DropTable('fake');
+        $sql .= '; ' . $dropTable->getSqlString($this->adapter->getPlatform());
 
         // execute multi-statement sql
         $this->addSql($sql);
@@ -39,7 +39,7 @@ class Version02 extends AbstractMigration implements AdapterAwareInterface
     public function down(MetadataInterface $schema)
     {
         // clean up result of first statement
-        $drop_test = new DropTable('test');
-        $this->addSql($drop_test->getSqlString($this->adapter->getPlatform()));
+        $dropTable = new DropTable('test');
+        $this->addSql($dropTable->getSqlString($this->adapter->getPlatform()));
     }
 }

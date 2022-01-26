@@ -47,9 +47,9 @@ class MigrationTest extends TestCase
             'namespace' => 'ZfSimpleMigrations\\Library\\ApplyMigration'
         ];
 
-        $this->adapter = $adapter = new Adapter($driverConfig);
+        $this->adapter = new Adapter($driverConfig);
 
-        $metadata = new Metadata($adapter);
+        $metadata = new Metadata($this->adapter);
         $tableNames = $metadata->getTableNames();
 
         $drop_if_exists = [
@@ -60,20 +60,19 @@ class MigrationTest extends TestCase
             if (in_array($table, $tableNames)) {
                 // ensure db is in expected state
                 $drop = new DropTable($table);
-                $adapter->query($drop->getSqlString($adapter->getPlatform()));
+                $this->adapter->query($drop->getSqlString($this->adapter->getPlatform()));
             }
         }
-
 
         /** @var ArrayObject $version */
         $version = new MigrationVersion();
         $resultSetPrototype = new ResultSet();
         $resultSetPrototype->setArrayObjectPrototype($version);
 
-        $gateway = new TableGateway(MigrationVersion::TABLE_NAME, $adapter, null, $resultSetPrototype);
+        $gateway = new TableGateway(MigrationVersion::TABLE_NAME, $this->adapter, null, $resultSetPrototype);
         $table = new MigrationVersionTable($gateway);
 
-        $this->migration = new Migration($adapter, $config, $table);
+        $this->migration = new Migration($this->adapter, $config, $table);
     }
 
     public function testApplyMigration()

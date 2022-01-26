@@ -24,14 +24,14 @@ class Version01 extends AbstractMigration implements AdapterAwareInterface
 
     public function up(MetadataInterface $schema)
     {
-        $create_test = new CreateTable('test');
-        $create_test->addColumn(new Integer('a'));
-        $this->addSql($create_test->getSqlString($this->adapter->getPlatform()));
+        $createTable = new CreateTable('test');
+        $createTable->addColumn(new Integer('a'));
+        $this->addSql($createTable->getSqlString($this->adapter->getPlatform()));
     }
 
     public function down(MetadataInterface $schema)
     {
-        $drop_test = new DropTable('test');
-        $this->addSql($drop_test->getSqlString($this->adapter->getPlatform()));
+        $dropTable = new DropTable('test');
+        $this->addSql($dropTable->getSqlString($this->adapter->getPlatform()));
     }
 }
