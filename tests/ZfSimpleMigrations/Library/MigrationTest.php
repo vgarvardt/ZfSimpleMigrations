@@ -32,20 +32,19 @@ class MigrationTest extends TestCase
     {
         parent::setUp();
         $driverConfig = [
-            'driver' => getenv('db_type'),
-            // sqlite handling (if necessary)
-            'database' => str_replace('%BASE_DIR%', __DIR__ . '/../../ZfSimpleMigrations/', getenv('db_name')),
-            'username' => getenv('db_username'),
-            'password' => getenv('db_password'),
-            'hostname' => getenv('db_host'),
-            'port' => getenv('db_port'),
+            'driver' => getenv('DB_TYPE'),
+            'database' => getenv('DB_NAME'),
+            'username' => getenv('DB_USERNAME'),
+            'password' => getenv('DB_PASSWORD'),
+            'hostname' => getenv('DB_HOST'),
+            'port' => getenv('DB_PORT'),
             'options' => [
                 'buffer_results' => true,
             ],
         ];
         $config = [
-            'dir' => __DIR__ . '/../data/ApplyMigration',
-            'namespace' => 'ApplyMigration'
+            'dir' => __DIR__ . '/ApplyMigration',
+            'namespace' => 'ZfSimpleMigrations\\Library\\ApplyMigration'
         ];
 
         $this->adapter = $adapter = new Adapter($driverConfig);

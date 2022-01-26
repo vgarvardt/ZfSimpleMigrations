@@ -7,8 +7,8 @@ on:
     branches: [ master ]
 
 jobs:
-  test:
-    name: Test
+  unit-test:
+    name: Unit Test
     runs-on: ubuntu-latest
     timeout-minutes: 10
 
@@ -19,7 +19,7 @@ jobs:
       - name: Setup PHP
         uses: ./.github/actions/setup-php
 
-      - name: Run unit tests
+      - name: Run tests
         run: phpdbg -qrr vendor/bin/phpunit -c ./phpunit.xml --group "unit" --coverage-clover="./coverage.xml" --coverage-text="php://stdout" --log-junit="./junit-logfile.xml"
 
       - name: Upload coverage to Codecov
@@ -28,4 +28,35 @@ jobs:
         with:
           files: ./coverage.xml,./junit-logfile.xml
           flags: unit
+          fail_ci_if_error: false
+
+  integration-test-sqlite:
+    name: Integration Test Sqlite
+    needs: unit-test
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v2
+
+      - name: Setup PHP
+        uses: ./.github/actions/setup-php
+
+      - name: Run tests
+        run: phpdbg -qrr vendor/bin/phpunit -c ./phpunit.xml --group "integration" --coverage-clover="./coverage.xml" --coverage-text="php://stdout" --log-junit="./junit-logfile.xml"
+        env:
+          DB_TYPE: 'Pdo_Sqlite'
+          DB_HOST: ''
+          DB_USERNAME: ''
+          DB_PASSWORD: ''
+          DB_NAME: '/tmp/db.sqlite'
+          DB_PORT: ''
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v2
+        if: success()
+        with:
+          files: ./coverage.xml,./junit-logfile.xml
+          flags: integration
           fail_ci_if_error: false
