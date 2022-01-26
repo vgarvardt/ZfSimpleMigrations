@@ -2,41 +2,24 @@
 
 namespace ZfSimpleMigrations\UnitTest\Library;
 
+use PHPUnit\Framework\TestCase;
+use RuntimeException;
 use Zend\Mvc\Controller\ControllerManager;
 use Zend\ServiceManager\Config;
 use Zend\ServiceManager\ServiceManager;
 use ZfSimpleMigrations\Library\MigrationSkeletonGenerator;
 use ZfSimpleMigrations\Library\MigrationSkeletonGeneratorAbstractFactory;
 
-class MigrationSkeletonGeneratorAbstractFactoryTest extends \PHPUnit_Framework_TestCase
+class MigrationSkeletonGeneratorAbstractFactoryTest extends TestCase
 {
-    /** @var  ServiceManager */
-    protected $serviceManager;
-
-    public function setUp()
-    {
-        parent::setUp();
-        $this->serviceManager = new ServiceManager(new Config(['allow_override' => true]));
-        $this->serviceManager->setService('Config', [
-            'migrations' => [
-                'foo' => [
-                    'dir' => __DIR__,
-                    'namespace' => 'Foo'
-                ]
-            ]
-        ]);
-        $this->serviceManager->setService(
-            'migrations.skeletongenerator.foo',
-            $this->getMock(MigrationSkeletonGenerator::class, [], [], '', false)
-        );
-    }
-
     public function testItIndicatesWhatServicesItCreates()
     {
+        $serviceManager = $this->buildServiceManager();
+
         $factory = new MigrationSkeletonGeneratorAbstractFactory();
         $this->assertTrue(
             $factory->canCreateServiceWithName(
-                $this->serviceManager,
+                $serviceManager,
                 'migrations.skeletongenerator.foo',
                 'asdf'
             ),
@@ -45,7 +28,7 @@ class MigrationSkeletonGeneratorAbstractFactoryTest extends \PHPUnit_Framework_T
 
         $this->assertTrue(
             $factory->canCreateServiceWithName(
-                $this->serviceManager,
+                $serviceManager,
                 'asdf',
                 'migrations.skeletongenerator.foo'
             ),
@@ -54,7 +37,7 @@ class MigrationSkeletonGeneratorAbstractFactoryTest extends \PHPUnit_Framework_T
 
         $this->assertFalse(
             $factory->canCreateServiceWithName(
-                $this->serviceManager,
+                $serviceManager,
                 'asdf',
                 'asdf'
             ),
@@ -64,7 +47,10 @@ class MigrationSkeletonGeneratorAbstractFactoryTest extends \PHPUnit_Framework_T
 
     public function testItReturnsASkeletonGenerator()
     {
-        $controllerManager = new ControllerManager($this->serviceManager);
+        $serviceManager = $this->buildServiceManager();
+
+        $controllerManager = new ControllerManager();
+        $controllerManager->setServiceLocator($serviceManager);
 
         $factory = new MigrationSkeletonGeneratorAbstractFactory();
         $instance = $factory->createServiceWithName(
@@ -79,7 +65,7 @@ class MigrationSkeletonGeneratorAbstractFactoryTest extends \PHPUnit_Framework_T
         );
 
         $instance2 = $factory->createServiceWithName(
-            $this->serviceManager,
+            $serviceManager,
             'asdf',
             'migrations.skeletongenerator.foo'
         );
@@ -90,25 +76,25 @@ class MigrationSkeletonGeneratorAbstractFactoryTest extends \PHPUnit_Framework_T
         );
     }
 
-    /**
-     * @expectedException \RuntimeException
-     */
     public function testItComplainsIfNamedMigrationIsNotConfigured()
     {
+        $serviceManager = $this->buildServiceManager();
+
+        $this->expectException(RuntimeException::class);
+
         $factory = new MigrationSkeletonGeneratorAbstractFactory();
         $factory->createServiceWithName(
-            $this->serviceManager,
+            $serviceManager,
             'migrations.skeletongenerator.bar',
             'asdf'
         );
     }
 
-    /**
-     * @expectedException \RuntimeException
-     */
     public function testItComplainsIfDirIsNotConfigured()
     {
-        $this->serviceManager->setService('Config', [
+        $serviceManager = $this->buildServiceManager();
+
+        $serviceManager->setService('Config', [
             'migrations' => [
                 'bar' => [
                     'namespace' => 'Bar'
@@ -116,20 +102,21 @@ class MigrationSkeletonGeneratorAbstractFactoryTest extends \PHPUnit_Framework_T
             ]
         ]);
 
+        $this->expectException(RuntimeException::class);
+
         $factory = new MigrationSkeletonGeneratorAbstractFactory();
         $factory->createServiceWithName(
-            $this->serviceManager,
+            $serviceManager,
             'migrations.skeletongenerator.bar',
             'asdf'
         );
     }
 
-    /**
-     * @expectedException \RuntimeException
-     */
     public function testItComplainsIfNamespaceIsNotConfigured()
     {
-        $this->serviceManager->setService('Config', [
+        $serviceManager = $this->buildServiceManager();
+
+        $serviceManager->setService('Config', [
             'migrations' => [
                 'bar' => [
                     'dir' => __DIR__
@@ -137,11 +124,34 @@ class MigrationSkeletonGeneratorAbstractFactoryTest extends \PHPUnit_Framework_T
             ]
         ]);
 
+        $this->expectException(RuntimeException::class);
+
         $factory = new MigrationSkeletonGeneratorAbstractFactory();
         $factory->createServiceWithName(
-            $this->serviceManager,
+            $serviceManager,
             'migrations.skeletongenerator.bar',
             'asdf'
         );
+    }
+
+    private function buildServiceManager(): ServiceManager
+    {
+        $migrationSkeletonGenerator = $this->prophesize(MigrationSkeletonGenerator::class);
+
+        $serviceManager = new ServiceManager(new Config(['allow_override' => true]));
+        $serviceManager->setService('Config', [
+            'migrations' => [
+                'foo' => [
+                    'dir' => __DIR__,
+                    'namespace' => 'Foo'
+                ]
+            ]
+        ]);
+        $serviceManager->setService(
+            'migrations.skeletongenerator.foo',
+            $migrationSkeletonGenerator->reveal()
+        );
+
+        return $serviceManager;
     }
 }

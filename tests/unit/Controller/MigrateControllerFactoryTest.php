@@ -9,6 +9,7 @@
 
 namespace ZfSimpleMigrations\UnitTest\Controller;
 
+use PHPUnit\Framework\TestCase;
 use Zend\Mvc\Application;
 use Zend\Mvc\Controller\ControllerManager;
 use Zend\Mvc\MvcEvent;
@@ -19,38 +20,12 @@ use ZfSimpleMigrations\Controller\MigrateControllerFactory;
 use ZfSimpleMigrations\Library\Migration;
 use ZfSimpleMigrations\Library\MigrationSkeletonGenerator;
 
-class MigrateControllerFactoryTest extends \PHPUnit_Framework_TestCase
+class MigrateControllerFactoryTest extends TestCase
 {
-    /** @var  ServiceManager */
-    protected $serviceManager;
-
-    protected function setUp()
-    {
-        parent::setUp();
-
-        $this->serviceManager = new ServiceManager();
-        $this->serviceManager->setService(
-            'migrations.migration.foo',
-            $this->getMock(Migration::class, [], [], '', false)
-        );
-        $this->serviceManager->setService(
-            'migrations.skeleton-generator.foo',
-            $this->getMock(MigrationSkeletonGenerator::class, [], [], '', false)
-        );
-        $this->serviceManager->setService(
-            'Application',
-            $application = $this->getMock(Application::class, [], [], '', false)
-        );
-
-        $application->expects($this->any())
-            ->method('getMvcEvent')
-            ->willReturn($mvcEvent = new MvcEvent());
-        $mvcEvent->setRouteMatch(new RouteMatch(['name' => 'foo']));
-    }
-
     public function testItReturnsAController()
     {
-        $controllerManager = new ControllerManager($this->serviceManager);
+        $controllerManager = new ControllerManager();
+        $controllerManager->setServiceLocator($this->buildServiceManager());
 
         $factory = new MigrateControllerFactory();
         $instance = $factory->createService($controllerManager);
@@ -60,5 +35,36 @@ class MigrateControllerFactoryTest extends \PHPUnit_Framework_TestCase
             $instance,
             'factory should return an instance of ' . MigrateController::class
         );
+    }
+
+    private function buildServiceManager(): ServiceManager
+    {
+        $mvcEvent = new MvcEvent();
+
+        $migration = $this->prophesize(Migration::class);
+        $migrationSkeletonGenerator = $this->prophesize(MigrationSkeletonGenerator::class);
+        $application = $this->prophesize(Application::class);
+
+        $application->getMvcEvent()
+            ->shouldBeCalled()
+            ->willReturn($mvcEvent);
+
+        $serviceManager = new ServiceManager();
+        $serviceManager->setService(
+            'migrations.migration.foo',
+            $migration->reveal()
+        );
+        $serviceManager->setService(
+            'migrations.skeleton-generator.foo',
+            $migrationSkeletonGenerator->reveal()
+        );
+        $serviceManager->setService(
+            'Application',
+            $application->reveal()
+        );
+
+        $mvcEvent->setRouteMatch(new RouteMatch(['name' => 'foo']));
+
+        return $serviceManager;
     }
 }
