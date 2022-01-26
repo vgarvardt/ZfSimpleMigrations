@@ -23,9 +23,9 @@ use ZfSimpleMigrations\Model\MigrationVersionTable;
  */
 class MigrationTest extends TestCase
 {
-    /** @var  Adapter */
+    /** @var Adapter */
     private $adapter;
-    /** @var  Migration */
+    /** @var Migration */
     private $migration;
 
     protected function setUp()
@@ -77,7 +77,7 @@ class MigrationTest extends TestCase
         $this->migration = new Migration($adapter, $config, $table);
     }
 
-    public function test_apply_migration()
+    public function testApplyMigration()
     {
         $this->migration->migrate('01');
 
@@ -93,9 +93,11 @@ class MigrationTest extends TestCase
     /**
      * @expectedException \ZfSimpleMigrations\Library\MigrationException
      */
-    public function test_multi_statement_error_detection()
+    public function testMultiStatementErrorDetection()
     {
-        $this->markTestSkipped('need to implement driver specific features & test if this driver supports multi-row functionality');
+        $this->markTestSkipped(
+            'need to implement driver specific features & test if this driver supports multi-row functionality'
+        );
 
         try {
             $this->migration->migrate('02');
@@ -108,7 +110,7 @@ class MigrationTest extends TestCase
         $this->fail(sprintf('expected exception %s', '\ZfSimpleMigrations\Library\MigrationException'));
     }
 
-    public function test_migration_initializes_migration_table()
+    public function testMigrationInitializesMigrationTable()
     {
         // because Migration was instantiated in setup, the version table should exist
         $metadata = new Metadata($this->adapter);

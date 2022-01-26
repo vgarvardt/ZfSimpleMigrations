@@ -27,7 +27,6 @@ class Version01 extends AbstractMigration implements AdapterAwareInterface
         $create_test = new CreateTable('test');
         $create_test->addColumn(new Integer('a'));
         $this->addSql($create_test->getSqlString($this->adapter->getPlatform()));
-
     }
 
     public function down(MetadataInterface $schema)
