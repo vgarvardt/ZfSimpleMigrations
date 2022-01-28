@@ -9,16 +9,15 @@ use Zend\Db\Adapter\Exception\InvalidQueryException;
 use Zend\Db\Metadata\Metadata;
 use Zend\Db\Sql\Ddl;
 use Zend\Db\Sql\Sql;
-use Zend\ServiceManager\ServiceLocatorAwareInterface;
-use Zend\ServiceManager\ServiceLocatorInterface;
+
 use ZfSimpleMigrations\Library\OutputWriter;
 use ZfSimpleMigrations\Model\MigrationVersion;
 use ZfSimpleMigrations\Model\MigrationVersionTable;
-
+use Interop\Container\ContainerInterface;
 /**
  * Main migration logic
  */
-class Migration implements ServiceLocatorAwareInterface
+class Migration
 {
     protected $migrationsDir;
     protected $migrationsNamespace;
@@ -263,7 +262,7 @@ class Migration implements ServiceLocatorAwareInterface
             /** @var $migrationObject AbstractMigration */
             $migrationObject = new $migration['class']($this->metadata, $this->outputWriter);
 
-            if ($migrationObject instanceof ServiceLocatorAwareInterface) {
+            if ($migrationObject instanceof MigrationInterface) {
                 if (is_null($this->serviceLocator)) {
                     throw new \RuntimeException(
                         sprintf(
