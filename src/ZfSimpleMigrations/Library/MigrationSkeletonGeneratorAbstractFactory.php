@@ -7,45 +7,37 @@ namespace ZfSimpleMigrations\Library;
 use RuntimeException;
 use Zend\ServiceManager\AbstractFactoryInterface;
 use Zend\ServiceManager\AbstractPluginManager;
-use Zend\ServiceManager\ServiceLocatorInterface;
+use Interop\Container\ContainerInterface;
 
 class MigrationSkeletonGeneratorAbstractFactory implements AbstractFactoryInterface
 {
-    const FACTORY_PATTERN = '/migrations\.skeletongenerator\.(.*)/';
+    const FACTORY_PATTERN = '/migrations\.skeleton-generator\.(.*)/';
+        
     /**
-     * Determine if we can create a service with name
+     * canCreate
      *
-     * @param ServiceLocatorInterface $serviceLocator
-     * @param $name
-     * @param $requestedName
+     * @param  Interop\Container\ContainerInterface $container
+     * @param  mixed $requestedName
      * @return bool
      */
-    public function canCreateServiceWithName(ServiceLocatorInterface $serviceLocator, $name, $requestedName)
-    {
-        return preg_match(self::FACTORY_PATTERN, $name)
-            || preg_match(self::FACTORY_PATTERN, $requestedName);
+    public function canCreate(ContainerInterface $container, $requestedName) {
+        return preg_match(self::FACTORY_PATTERN, $requestedName);
     }
-
+    
     /**
-     * Create service with name
+     * __invoke
      *
-     * @param ServiceLocatorInterface $serviceLocator
-     * @param $name
-     * @param $requestedName
-     * @return mixed
+     * @param  Interop\Container\ContainerInterface $container
+     * @param  mixed $requestedName
+     * @param  mixed $options
+     * @return MigrationSkeletonGenerator
      */
-    public function createServiceWithName(ServiceLocatorInterface $serviceLocator, $name, $requestedName)
-    {
-        if ($serviceLocator instanceof AbstractPluginManager) {
-            $serviceLocator = $serviceLocator->getServiceLocator();
-        }
-
-        preg_match(self::FACTORY_PATTERN, $name, $matches)
-            || preg_match(self::FACTORY_PATTERN, $requestedName, $matches);
+    public function __invoke(ContainerInterface $container, $requestedName, array $options = null) {
+        
+        preg_match(self::FACTORY_PATTERN, $requestedName, $matches);
         $migration_name = $matches[1];
 
-
-        $config = $serviceLocator->get('Config');
+        $config = $container->get('Config');
 
         if (! isset($config['migrations'][$migration_name])) {
             throw new RuntimeException(sprintf("`%s` is not in migrations configuration", $migration_name));
@@ -62,7 +54,7 @@ class MigrationSkeletonGeneratorAbstractFactory implements AbstractFactoryInterf
         }
 
         $generator = new MigrationSkeletonGenerator($migration_config['dir'], $migration_config['namespace']);
-
+  
         return $generator;
     }
 }
