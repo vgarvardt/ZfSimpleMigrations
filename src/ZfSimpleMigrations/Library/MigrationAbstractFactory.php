@@ -6,72 +6,65 @@ namespace ZfSimpleMigrations\Library;
 use RuntimeException;
 use Zend\ServiceManager\AbstractFactoryInterface;
 use Zend\ServiceManager\AbstractPluginManager;
-use Zend\ServiceManager\ServiceLocatorInterface;
 use ZfSimpleMigrations\Model\MigrationVersionTable;
+use Interop\Container\ContainerInterface;
 
 class MigrationAbstractFactory implements AbstractFactoryInterface
 {
     const FACTORY_PATTERN = '/migrations\.migration\.(.*)/';
     /**
-     * Determine if we can create a service with name
+     * canCreate
      *
-     * @param ServiceLocatorInterface $serviceLocator
-     * @param $name
-     * @param $requestedName
+     * @param  Interop\Container\ContainerInterface $container
+     * @param  mixed $requestedName
      * @return bool
      */
-    public function canCreateServiceWithName(ServiceLocatorInterface $serviceLocator, $name, $requestedName)
-    {
-        return preg_match(self::FACTORY_PATTERN, $name) || preg_match(self::FACTORY_PATTERN, $requestedName);
+    public function canCreate(ContainerInterface $container, $requestedName) {
+        return preg_match(self::FACTORY_PATTERN, $requestedName) ;
     }
-
+    
     /**
-     * Create service with name
+     * __invoke
      *
-     * @param ServiceLocatorInterface $serviceLocator
-     * @param $name
-     * @param $requestedName
+     * @param  Interop\Container\ContainerInterface $container
+     * @param  mixed $requestedName
+     * @param  mixed $options
      * @return Migration
      */
-    public function createServiceWithName(ServiceLocatorInterface $serviceLocator, $name, $requestedName)
-    {
-        if ($serviceLocator instanceof AbstractPluginManager) {
-            $serviceLocator = $serviceLocator->getServiceLocator();
-        }
+    public function __invoke(ContainerInterface $container, $requestedName, array $options = null) {
+        $config = $container->get('Config');
 
-        $config = $serviceLocator->get('Config');
-
-        preg_match(self::FACTORY_PATTERN, $name, $matches)
+        preg_match(self::FACTORY_PATTERN, $requestedName, $matches)
         || preg_match(self::FACTORY_PATTERN, $requestedName, $matches);
 
         $name = $matches[1];
 
         if (! isset($config['migrations'][$name])) {
-            throw new RuntimeException(sprintf("`%s` does not exist in migrations configuration", $name));
+            throw new RuntimeException(sprintf("`%s` does not exist in migrations configuration", $requestedName));
         }
 
-        $migration_config = $config['migrations'][$name];
+        $migration_config = $config['migrations'][$requestedName];
 
         $adapter_name = isset($migration_config['adapter'])
             ? $migration_config['adapter'] : 'Zend\Db\Adapter\Adapter';
         /** @var $adapter \Zend\Db\Adapter\Adapter */
-        $adapter = $serviceLocator->get($adapter_name);
+        $adapter = $container->get($adapter_name);
 
 
         $output = null;
         if (isset($migration_config['show_log']) && $migration_config['show_log']) {
-            $console = $serviceLocator->get('console');
+            $console = $container->get('console');
             $output = new OutputWriter(function ($message) use ($console) {
                 $console->write($message . "\n");
             });
         }
 
         /** @var MigrationVersionTable $version_table */
-        $version_table = $serviceLocator->get('migrations.versiontable.' . $adapter_name);
+        $version_table = $container->get('migrations.versiontable.' . $adapter_name);
 
         $migration = new Migration($adapter, $migration_config, $version_table, $output);
 
-        $migration->setServiceLocator($serviceLocator);
+        $migration->setServiceLocator($container);
 
         return $migration;
     }
