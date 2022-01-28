@@ -7,7 +7,7 @@
         "database",
         "db",
         "migrations",
-        "zf2"
+        "zf3"
     ],
     "homepage": "https://github.com/vgarvardt/ZfSimpleMigrations",
     "authors": [
