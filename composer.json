@@ -1,40 +1,45 @@
 {
-    "name": "vgarvardt/zf-simple-migrations",
-    "description": "Module for database migrations management.",
-    "type": "library",
-    "license": "BSD-3-Clause",
-    "keywords": [
-        "database",
-        "db",
-        "migrations",
-        "zf3"
-    ],
-    "homepage": "https://github.com/vgarvardt/ZfSimpleMigrations",
-    "authors": [
-        {
-            "name": "Vadim Knyzev",
-            "email": "vadim.knyzev@gmail.com",
-            "homepage": "http://vadim-knyzev.blogspot.com/"
-        },
-        {
-            "name": "Vladimir Garvardt",
-            "email": "vgarvardt@gmail.com",
-            "homepage": "http://itskrig.com/"
-        }
-    ],
-    "require": {
-        "php": ">=5.4",
-        "zendframework/zendframework": ">=2.2.0"
+  "name": "vgarvardt/zf-simple-migrations",
+  "description": "Module for database migrations management.",
+  "type": "library",
+  "license": "BSD-3-Clause",
+  "keywords": [
+    "database",
+    "db",
+    "migrations",
+    "zf2"
+  ],
+  "homepage": "https://github.com/vgarvardt/ZfSimpleMigrations",
+  "authors": [
+    {
+      "name": "Vadim Knyzev",
+      "email": "vadim.knyzev@gmail.com",
+      "homepage": "https://vadim-knyzev.blogspot.com/"
     },
-    "require-dev": {
-        "phpunit/phpunit": "4.6.*"
-    },
-    "autoload": {
-        "psr-0": {
-            "ZfSimpleMigrations": "src/"
-        },
-        "classmap": [
-            "./Module.php"
-        ]
+    {
+      "name": "Vladimir Garvardt",
+      "email": "vgarvardt@gmail.com",
+      "homepage": "https://itskrig.com/"
     }
+  ],
+  "require": {
+    "php": ">=7.0,<8",
+    "zendframework/zendframework": ">=2.2.0,<3"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "6.5.*"
+  },
+  "autoload": {
+    "psr-0": {
+      "ZfSimpleMigrations": "src/"
+    },
+    "classmap": [
+      "./Module.php"
+    ]
+  },
+  "autoload-dev": {
+    "psr-0": {
+      "ZfSimpleMigrations": "tests/"
+    }
+  }
 }

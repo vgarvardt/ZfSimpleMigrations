@@ -1,0 +1,123 @@
+name: Testing
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  unit-test:
+    name: Unit Test
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v2
+
+      - name: Setup PHP
+        uses: ./.github/actions/setup-php
+
+      - name: Run tests
+        run: phpdbg -qrr vendor/bin/phpunit -c ./phpunit.xml --group "unit" --coverage-clover="./coverage.xml" --coverage-text="php://stdout" --log-junit="./junit-logfile.xml"
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v2
+        if: success()
+        with:
+          files: ./coverage.xml,./junit-logfile.xml
+          flags: unit
+          fail_ci_if_error: false
+
+  integration-test:
+    name: Integration Test
+    needs: unit-test
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    strategy:
+      fail-fast: false
+      matrix:
+        db:
+          - DB_TYPE: 'Pdo_Sqlite'
+            DB_HOST: ''
+            DB_USERNAME: ''
+            DB_PASSWORD: ''
+            DB_NAME: '/tmp/db.sqlite'
+            DB_PORT: ''
+          #          - DB_TYPE: 'Pdo_Pgsql'
+          #            DB_HOST: 'localhost'
+          #            DB_USERNAME: 'test'
+          #            DB_PASSWORD: 'test'
+          #            DB_NAME: 'test'
+          #            DB_PORT: '5432'
+          - DB_TYPE: 'Pdo_Mysql'
+            DB_HOST: '127.0.0.1'
+            DB_USERNAME: 'test'
+            DB_PASSWORD: 'test'
+            DB_NAME: 'test'
+            DB_PORT: '3306'
+          - DB_TYPE: 'Mysqli'
+            DB_HOST: '127.0.0.1'
+            DB_USERNAME: 'test'
+            DB_PASSWORD: 'test'
+            DB_NAME: 'test'
+            DB_PORT: '3306'
+
+    # Run all the DBs at once, although every test will use only one
+    services:
+      postgres:
+        image: postgres:9.6-alpine
+        ports:
+          - "5432:5432"
+        env:
+          LC_ALL: C.UTF-8
+          POSTGRES_USER: test
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+      mysql:
+        image: mysql:5.7
+        ports:
+          - "3306:3306"
+        env:
+          MYSQL_ROOT_PASSWORD: test
+          MYSQL_DATABASE: test
+          MYSQL_USER: test
+          MYSQL_PASSWORD: test
+        options: >-
+          --health-cmd "mysqladmin ping -h 127.0.0.1 -u $$MYSQL_USER --password=$$MYSQL_PASSWORD"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v2
+
+      - name: Setup PHP
+        uses: ./.github/actions/setup-php
+
+      - name: Run tests
+        run: phpdbg -qrr vendor/bin/phpunit -c ./phpunit.xml --group "integration" --coverage-clover="./coverage.xml" --coverage-text="php://stdout" --log-junit="./junit-logfile.xml"
+        env:
+          DB_TYPE: ${{ matrix.db.DB_TYPE }}
+          DB_HOST: ${{ matrix.db.DB_HOST }}
+          DB_USERNAME: ${{ matrix.db.DB_USERNAME }}
+          DB_PASSWORD: ${{ matrix.db.DB_PASSWORD }}
+          DB_NAME: ${{ matrix.db.DB_NAME }}
+          DB_PORT: ${{ matrix.db.DB_PORT }}
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v2
+        if: success()
+        with:
+          files: ./coverage.xml,./junit-logfile.xml
+          flags: integration
+          fail_ci_if_error: false

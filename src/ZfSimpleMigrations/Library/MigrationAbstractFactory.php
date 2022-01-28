@@ -1,9 +1,9 @@
 <?php
 
-
 namespace ZfSimpleMigrations\Library;
 
 use RuntimeException;
+use Zend\Db\Adapter\Adapter;
 use Zend\ServiceManager\AbstractFactoryInterface;
 use Zend\ServiceManager\AbstractPluginManager;
 use ZfSimpleMigrations\Model\MigrationVersionTable;
@@ -12,6 +12,7 @@ use Interop\Container\ContainerInterface;
 class MigrationAbstractFactory implements AbstractFactoryInterface
 {
     const FACTORY_PATTERN = '/migrations\.migration\.(.*)/';
+
     /**
      * canCreate
      *
@@ -30,7 +31,9 @@ class MigrationAbstractFactory implements AbstractFactoryInterface
      * @param  mixed $requestedName
      * @param  mixed $options
      * @return Migration
+     * @throws MigrationException
      */
+]
     public function __invoke(ContainerInterface $container, $requestedName, array $options = null) {
         $config = $container->get('Config');
 
