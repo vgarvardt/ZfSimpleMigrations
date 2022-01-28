@@ -6,42 +6,40 @@ namespace ZfSimpleMigrations\Model;
 
 use Zend\Db\TableGateway\TableGateway;
 use Zend\ServiceManager\AbstractFactoryInterface;
-use Zend\ServiceManager\ServiceLocatorInterface;
+use Interop\Container\ContainerInterface;
 
 class MigrationVersionTableAbstractFactory implements AbstractFactoryInterface
 {
     const FACTORY_PATTERN = '/migrations\.versiontable\.(.*)/';
+        
     /**
-     * Determine if we can create a service with name
+     *  Determine if we can create a service with name
      *
-     * @param ServiceLocatorInterface $serviceLocator
-     * @param $name
-     * @param $requestedName
+     * @param  Interop\Container\ContainerInterface $container
+     * @param  mixed $requestedName
      * @return bool
      */
-    public function canCreateServiceWithName(ServiceLocatorInterface $serviceLocator, $name, $requestedName)
-    {
-        return preg_match(self::FACTORY_PATTERN, $name) || preg_match(self::FACTORY_PATTERN, $requestedName);
+    public function canCreate(ContainerInterface $container, $requestedName) {
+        return preg_match(self::FACTORY_PATTERN, $requestedName);
     }
-
+    
     /**
      * Create service with name
      *
-     * @param ServiceLocatorInterface $serviceLocator
-     * @param $name
-     * @param $requestedName
-     * @return mixed
+     * @param  Interop\Container\ContainerInterface $container
+     * @param  mixed $requestedName
+     * @param  mixed $options
+     * @return MigrationVersionTable
      */
-    public function createServiceWithName(ServiceLocatorInterface $serviceLocator, $name, $requestedName)
-    {
+    public function __invoke(ContainerInterface $container, $requestedName, array $options = null) {
         // $matches will be set by first preg_match if it matches, or second preg_match if it doesnt
-        preg_match(self::FACTORY_PATTERN, $name, $matches)
+        preg_match(self::FACTORY_PATTERN, $requestedName, $matches)
         || preg_match(self::FACTORY_PATTERN, $requestedName, $matches);
 
         $adapter_name = $matches[1];
 
         /** @var $tableGateway TableGateway */
-        $tableGateway = $serviceLocator->get('migrations.versiontablegateway.' . $adapter_name);
+        $tableGateway = $container->get('migrations.versiontablegateway.' . $adapter_name);
         $table = new MigrationVersionTable($tableGateway);
         return $table;
     }
