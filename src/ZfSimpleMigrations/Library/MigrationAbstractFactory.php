@@ -33,7 +33,7 @@ class MigrationAbstractFactory implements AbstractFactoryInterface
      * @return Migration
      * @throws MigrationException
      */
-]
+
     public function __invoke(ContainerInterface $container, $requestedName, array $options = null) {
         $config = $container->get('Config');
 
