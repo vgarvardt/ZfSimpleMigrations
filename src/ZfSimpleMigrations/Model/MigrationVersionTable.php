@@ -27,7 +27,7 @@ class MigrationVersionTable
 
     protected function savePg($version): int
     {
-        $sql = sprintf('INSERT INTO "%s" ("version") VALUES ($1) RETURNING "id"', $this->tableGateway->getTable());
+        $sql = sprintf('INSERT INTO "%s" ("version") VALUES (?) RETURNING "id"', $this->tableGateway->getTable());
         $stmt = $this->tableGateway->getAdapter()->getDriver()->createStatement($sql);
         $result = $stmt->execute([$version]);
         $row = $result->current();
