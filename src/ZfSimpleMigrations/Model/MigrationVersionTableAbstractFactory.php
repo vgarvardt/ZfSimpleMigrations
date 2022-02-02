@@ -5,7 +5,7 @@ namespace ZfSimpleMigrations\Model;
 
 
 use Zend\Db\TableGateway\TableGateway;
-use Zend\ServiceManager\AbstractFactoryInterface;
+use Zend\ServiceManager\Factory\AbstractFactoryInterface;
 use Interop\Container\ContainerInterface;
 
 class MigrationVersionTableAbstractFactory implements AbstractFactoryInterface
