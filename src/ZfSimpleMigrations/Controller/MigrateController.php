@@ -1,41 +1,40 @@
 <?php
+
 namespace ZfSimpleMigrations\Controller;
 
+use ReflectionException;
 use Zend\Mvc\Controller\AbstractActionController;
 use Zend\Mvc\MvcEvent;
 use Zend\Console\Request as ConsoleRequest;
 use ZfSimpleMigrations\Library\Migration;
 use ZfSimpleMigrations\Library\MigrationException;
 use ZfSimpleMigrations\Library\MigrationSkeletonGenerator;
-use ZfSimpleMigrations\Library\OutputWriter;
 
 /**
  * Migration commands controller
  */
 class MigrateController extends AbstractActionController
 {
-    /**
-     * @var \ZfSimpleMigrations\Library\Migration
-     */
+    /**  @var Migration */
     protected $migration;
     /** @var  MigrationSkeletonGenerator */
-    protected $skeleton_generator;
+    protected $skeletonGenerator;
 
     /**
      * @return MigrationSkeletonGenerator
      */
-    public function getSkeletonGenerator()
+    public function getSkeletonGenerator(): MigrationSkeletonGenerator
     {
-        return $this->skeleton_generator;
+        return $this->skeletonGenerator;
     }
 
     /**
-     * @param MigrationSkeletonGenerator $skeleton_generator
+     * @param MigrationSkeletonGenerator $skeletonGenerator
      * @return self
      */
-    public function setSkeletonGenerator($skeleton_generator)
+    public function setSkeletonGenerator(MigrationSkeletonGenerator $skeletonGenerator): self
     {
-        $this->skeleton_generator = $skeleton_generator;
+        $this->skeletonGenerator = $skeletonGenerator;
         return $this;
     }
 
@@ -53,7 +52,7 @@ class MigrateController extends AbstractActionController
      *
      * @return ConsoleRequest
      */
-    public function getRequest()
+    public function getRequest(): ConsoleRequest
     {
         return parent::getRequest();
     }
@@ -61,9 +60,9 @@ class MigrateController extends AbstractActionController
     /**
      * Get current migration version
      *
-     * @return int
+     * @return string
      */
-    public function versionAction()
+    public function versionAction(): string
     {
         return sprintf("Current version %s\n", $this->getMigration()->getCurrentVersion());
     }
@@ -72,8 +71,9 @@ class MigrateController extends AbstractActionController
      * List migrations - not applied by default, all with 'all' flag.
      *
      * @return string
+     * @throws ReflectionException
      */
-    public function listAction()
+    public function listAction(): string
     {
         $migrations = $this->getMigration()->getMigrationClasses($this->getRequest()->getParam('all'));
         $list = [];
@@ -85,8 +85,10 @@ class MigrateController extends AbstractActionController
 
     /**
      * Apply migration
+     * @throws ReflectionException
+     * @throws MigrationException
      */
-    public function applyAction()
+    public function applyAction(): string
     {
         $migrations = $this->getMigration()->getMigrationClasses();
         $currentMigrationVersion = $this->getMigration()->getCurrentVersion();
@@ -95,7 +97,6 @@ class MigrateController extends AbstractActionController
         $force = $this->getRequest()->getParam('force');
         $down = $this->getRequest()->getParam('down');
         $fake = $this->getRequest()->getParam('fake');
-        $name = $this->getRequest()->getParam('name');
 
         if (is_null($version) && $force) {
             return "Can't force migration apply without migration version explicitly set.";
@@ -113,8 +114,9 @@ class MigrateController extends AbstractActionController
 
     /**
      * Generate new migration skeleton class
+     * @throws MigrationException
      */
-    public function generateSkeletonAction()
+    public function generateSkeletonAction(): string
     {
         $classPath = $this->getSkeletonGenerator()->generate();
 
@@ -124,7 +126,7 @@ class MigrateController extends AbstractActionController
     /**
      * @return Migration
      */
-    public function getMigration()
+    public function getMigration(): Migration
     {
         return $this->migration;
     }
@@ -133,7 +135,7 @@ class MigrateController extends AbstractActionController
      * @param Migration $migration
      * @return self
      */
-    public function setMigration(Migration $migration)
+    public function setMigration(Migration $migration): self
     {
         $this->migration = $migration;
         return $this;
