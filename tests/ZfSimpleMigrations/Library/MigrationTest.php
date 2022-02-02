@@ -52,11 +52,11 @@ class MigrationTest extends TestCase
         $metadata = new Metadata($this->adapter);
         $tableNames = $metadata->getTableNames();
 
-        $drop_if_exists = [
+        $dropIfExists = [
             'test',
             MigrationVersion::TABLE_NAME
         ];
-        foreach ($drop_if_exists as $table) {
+        foreach ($dropIfExists as $table) {
             if (in_array($table, $tableNames)) {
                 // ensure db is in expected state
                 $drop = new DropTable($table);

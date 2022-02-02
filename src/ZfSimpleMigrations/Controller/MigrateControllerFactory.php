@@ -1,10 +1,7 @@
 <?php
 
-
 namespace ZfSimpleMigrations\Controller;
 
-
-use Zend\Console\Request;
 use Zend\Mvc\Router\Console\RouteMatch;
 use Zend\ServiceManager\AbstractPluginManager;
 use Zend\ServiceManager\FactoryInterface;
@@ -14,17 +11,15 @@ use ZfSimpleMigrations\Library\MigrationSkeletonGenerator;
 
 class MigrateControllerFactory implements FactoryInterface
 {
-
     /**
      * Create service
      *
      * @param ServiceLocatorInterface $serviceLocator
-     * @return mixed
+     * @return MigrateController
      */
-    public function createService(ServiceLocatorInterface $serviceLocator)
+    public function createService(ServiceLocatorInterface $serviceLocator): MigrateController
     {
-        if($serviceLocator instanceof AbstractPluginManager)
-        {
+        if ($serviceLocator instanceof AbstractPluginManager) {
             $serviceLocator = $serviceLocator->getServiceLocator();
         }
 

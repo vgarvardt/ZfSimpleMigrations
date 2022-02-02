@@ -100,6 +100,11 @@ class Migration implements ServiceLocatorAwareInterface
      */
     protected function checkCreateMigrationTable()
     {
+        if ($this->adapter->getPlatform()->getName() === 'PostgreSQL') {
+            $this->checkCreateMigrationTablePg();
+            return;
+        }
+
         $table = new Ddl\CreateTable(MigrationVersion::TABLE_NAME);
         $table->addColumn(new Ddl\Column\Integer('id', false, null, ['autoincrement' => true]));
         $table->addColumn(new Ddl\Column\BigInteger('version'));
@@ -109,11 +114,26 @@ class Migration implements ServiceLocatorAwareInterface
         $sql = new Sql($this->adapter);
 
         try {
-            $this->adapter->query($sql->getSqlStringForSqlObject($table), Adapter::QUERY_MODE_EXECUTE);
+            $this->adapter->query($sql->buildSqlString($table), Adapter::QUERY_MODE_EXECUTE);
         } catch (Exception $e) {
             // currently there are no db-independent way to check if table exists
             // so we assume that table exists when we catch exception
         }
+    }
+
+    /**
+     * Special case because ZF2 DDL does not support pg serial field
+     */
+    protected function checkCreateMigrationTablePg()
+    {
+        $sql = <<<SQL
+CREATE TABLE IF NOT EXISTS "%s" (
+    id SERIAL PRIMARY KEY,
+    version bigint UNIQUE
+);
+SQL;
+
+        $this->adapter->query(sprintf($sql, MigrationVersion::TABLE_NAME), Adapter::QUERY_MODE_EXECUTE);
     }
 
     /**

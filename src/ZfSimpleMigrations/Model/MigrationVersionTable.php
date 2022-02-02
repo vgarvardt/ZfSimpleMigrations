@@ -17,8 +17,20 @@ class MigrationVersionTable
 
     public function save($version): int
     {
+        if ($this->tableGateway->getAdapter()->getPlatform()->getName() === 'PostgreSQL') {
+            return $this->savePg($version);
+        }
+
         $this->tableGateway->insert(['version' => $version]);
         return $this->tableGateway->lastInsertValue;
+    }
+
+    protected function savePg($version): int
+    {
+        $sql = sprintf('INSERT INTO "%s" ("version") VALUES (?) RETURNING "id"', $this->tableGateway->getTable());
+        $stmt = $this->tableGateway->getAdapter()->getDriver()->createStatement($sql);
+        $result = $stmt->execute([$version]);
+        return $result->current()["id"];
     }
 
     public function delete($version)
