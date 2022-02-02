@@ -5,7 +5,7 @@ namespace ZfSimpleMigrations\Library;
 
 
 use RuntimeException;
-use Zend\ServiceManager\AbstractFactoryInterface;
+use Zend\ServiceManager\Factory\AbstractFactoryInterface;
 use Zend\ServiceManager\AbstractPluginManager;
 use Interop\Container\ContainerInterface;
 
