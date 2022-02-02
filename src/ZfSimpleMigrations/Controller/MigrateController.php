@@ -104,7 +104,9 @@ class MigrateController extends AbstractActionController
         if (is_null($version) && $fake) {
             return "Can't fake migration apply without migration version explicitly set.";
         }
-        if (!$force && is_null($version) && $currentMigrationVersion >= $this->getMigration()->getMaxMigrationVersion($migrations)) {
+
+        $maxMigrationVersion = $this->getMigration()->getMaxMigrationVersion($migrations);
+        if (!$force && is_null($version) && $currentMigrationVersion >= $maxMigrationVersion) {
             return "No migrations to apply.\n";
         }
 
@@ -140,6 +142,4 @@ class MigrateController extends AbstractActionController
         $this->migration = $migration;
         return $this;
     }
-
-
 }
