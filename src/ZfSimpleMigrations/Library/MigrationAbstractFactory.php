@@ -46,7 +46,7 @@ class MigrationAbstractFactory implements AbstractFactoryInterface
             throw new RuntimeException(sprintf("`%s` does not exist in migrations configuration", $requestedName));
         }
 
-        $migration_config = $config['migrations'][$requestedName];
+        $migration_config = $config['migrations'][$name];
 
         $adapter_name = isset($migration_config['adapter'])
             ? $migration_config['adapter'] : 'Zend\Db\Adapter\Adapter';
