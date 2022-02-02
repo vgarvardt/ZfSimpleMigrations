@@ -22,6 +22,8 @@ class MigrationVersionTable
             ->into($this->tableGateway->getTable())
             ->values(['version' => $version]);
 
+        var_dump($insert->getSqlString($this->tableGateway->getAdapter()->getPlatform()));
+
         $this->tableGateway->insertWith($insert);
         return $this->tableGateway->lastInsertValue;
     }
