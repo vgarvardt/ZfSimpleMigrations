@@ -364,6 +364,7 @@ SQL;
             $this->connection->commit();
         } catch (InvalidQueryException $e) {
             $this->connection->rollback();
+            var_dump($e);
             throw new MigrationException('Could not apply migration because of the invalid query', 0, $e);
         } catch (Throwable $e) {
             $this->connection->rollback();
