@@ -1,14 +1,17 @@
 # ZfSimpleMigrations
 
-Simple Migrations for Zend Framework 2. Project originally based on [ZendDbMigrations](https://github.com/vadim-knyzev/ZendDbMigrations) but module author did not response for issues and pull-requests so fork became independent project.
+Simple Migrations for Zend Framework 2. Project originally based
+on [ZendDbMigrations](https://github.com/vadim-knyzev/ZendDbMigrations) but module author did not response for issues
+and pull-requests so fork became independent project.
 
 ## Supported Drivers
+
 The following DB adapter drivers are supported by this module.
 
-  * Pdo_Sqlite
-  * Pdo_Mysql
-  * Mysqli _only if you configure the driver options with `'buffer_results' => true`_
-
+* Pdo_Sqlite
+* Pdo_Mysql
+* Pdo_Pgsql
+* Mysqli _only if you configure the driver options with `'buffer_results' => true`_
 
 ## Installation
 
@@ -18,6 +21,7 @@ The following DB adapter drivers are supported by this module.
 php composer.phar require vgarvardt/zf-simple-migrations:dev-master
 php composer.phar update
 ```
+
 add `ZfSimpleMigrations` to the `modules` array in application.config.php
 
 ## Usage
@@ -35,7 +39,7 @@ Generic migration class has name `Version<YmdHis>` and implement `ZfSimpleMigrat
 
 ### Migration class example
 
-``` php
+```php
 <?php
 
 namespace ZfSimpleMigrations\Migrations;
@@ -60,16 +64,18 @@ class Version20130403165433 extends AbstractMigration
 ```
 
 #### Multi-statement sql
-While this module supports execution of multiple SQL statements it does not have way to detect if any other statement than the first contained an error. It is *highly* recommended you only provide single SQL statements to `addSql` at a time.
-I.e instead of
 
-```
+While this module supports execution of multiple SQL statements it does not have way to detect if any other statement
+than the first contained an error. It is *highly* recommended you only provide single SQL statements to `addSql` at a
+time. I.e instead of
+
+```php
 $this->addSql('SELECT NOW(); SELECT NOW(); SELECT NOW();');
 ```
 
 You should use
 
-```
+```php
 $this->addSql('SELECT NOW();');
 $this->addSql('SELECT NOW();');
 $this->addSql('SELECT NOW();');
@@ -80,7 +86,7 @@ $this->addSql('SELECT NOW();');
 By implementing the `Zend\ServiceManager\ServiceLocatorAwareInterface` in your migration class you get access to the
 ServiceLocator used in the application.
 
-``` php
+```php
 <?php
 
 namespace ZfSimpleMigrations\Migrations;
@@ -114,8 +120,8 @@ class Version20130403165433 extends AbstractMigration
 
 ### Accessing Zend Db Adapter In Migration Class
 
-By implementing the `Zend\Db\Adapter\AdapterAwareInterface` in your migration class you get access to the
-Db Adapter configured for the migration.
+By implementing the `Zend\Db\Adapter\AdapterAwareInterface` in your migration class you get access to the Db Adapter
+configured for the migration.
 
 ```php
 <?php
@@ -155,23 +161,22 @@ class Version20150524162247 extends AbstractMigration implements AdapterAwareInt
 }
 ```
 
-
 ## Configuration
-  
+
 ### User Configuration
 
-The top-level key used to configure this module is `migrations`. 
+The top-level key used to configure this module is `migrations`.
 
 #### Migration Configurations: Migrations Name
 
-Each key under `migrations` is a migrations configuration, and the value is an array with one or more of
-the following keys.
+Each key under `migrations` is a migrations configuration, and the value is an array with one or more of the following
+keys.
 
 ##### Sub-key: `dir`
 
 The path to the directory where migration files are stored. Defaults to `./migrations` in the project root dir.
 
-##### Sub-key: `namespace` 
+##### Sub-key: `namespace`
 
 The class namespace that migration classes will be generated with. Defaults to `ZfSimpleMigrations\Migrations`.
 
