@@ -4,17 +4,42 @@ namespace ZfSimpleMigrations\Library;
 
 use Zend\Db\Metadata\MetadataInterface;
 use ZfSimpleMigrations\Library\MigrationInterface;
+use Interop\Container\ContainerInterface;
 
 abstract class AbstractMigration implements MigrationInterface
 {
     private $sql = [];
     private $metadata;
     private $writer;
+    protected $serviceLocator;
 
     public function __construct(MetadataInterface $metadata, OutputWriter $writer)
     {
         $this->metadata = $metadata;
         $this->writer = $writer;
+    }
+    
+    /**
+     * Set service locator
+     *
+     * @param ServiceLocatorInterface $serviceLocator
+     * @return mixed
+     */
+    public function setServiceLocator(ContainerInterface $serviceLocator)
+    {
+        $this->serviceLocator = $serviceLocator;
+        return $this;
+    }
+
+    /**
+     * Set service locator
+     *
+     * @param ServiceLocatorInterface $serviceLocator
+     * @return mixed
+     */
+    public function getServiceLocator()
+    {
+        return $this->serviceLocator;
     }
 
     /**

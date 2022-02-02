@@ -19,15 +19,14 @@ use Zend\Db\Adapter\Exception\InvalidQueryException;
 use Zend\Db\Metadata\Metadata;
 use Zend\Db\Sql\Ddl;
 use Zend\Db\Sql\Sql;
-use Zend\ServiceManager\ServiceLocatorAwareInterface;
-use Zend\ServiceManager\ServiceLocatorInterface;
+use ZfSimpleMigrations\Library\OutputWriter;
 use ZfSimpleMigrations\Model\MigrationVersion;
 use ZfSimpleMigrations\Model\MigrationVersionTable;
-
+use Interop\Container\ContainerInterface;
 /**
  * Main migration logic
  */
-class Migration implements ServiceLocatorAwareInterface
+class Migration
 {
     /** @var string */
     protected $migrationsDir;
@@ -293,7 +292,7 @@ class Migration implements ServiceLocatorAwareInterface
             /** @var AbstractMigration $migrationObject */
             $migrationObject = new $migration['class']($this->metadata, $this->outputWriter);
 
-            if ($migrationObject instanceof ServiceLocatorAwareInterface) {
+            if ($migrationObject instanceof MigrationInterface) {
                 if (is_null($this->serviceLocator)) {
                     throw new RuntimeException(
                         sprintf(
@@ -355,9 +354,9 @@ class Migration implements ServiceLocatorAwareInterface
      * Set service locator
      *
      * @param ServiceLocatorInterface $serviceLocator
-     * @return $this
+     * @return mixed
      */
-    public function setServiceLocator(ServiceLocatorInterface $serviceLocator): Migration
+    public function setServiceLocator(ContainerInterface $serviceLocator)
     {
         $this->serviceLocator = $serviceLocator;
 
@@ -369,7 +368,7 @@ class Migration implements ServiceLocatorAwareInterface
      *
      * @return ServiceLocatorInterface
      */
-    public function getServiceLocator(): ServiceLocatorInterface
+    public function getServiceLocator()
     {
         return $this->serviceLocator;
     }

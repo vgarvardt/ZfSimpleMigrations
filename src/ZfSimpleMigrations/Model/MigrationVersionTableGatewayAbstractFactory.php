@@ -1,47 +1,42 @@
 <?php
 
-
 namespace ZfSimpleMigrations\Model;
-
 
 use Zend\Db\ResultSet\ResultSet;
 use Zend\Db\TableGateway\TableGateway;
-use Zend\ServiceManager\AbstractFactoryInterface;
-use Zend\ServiceManager\ServiceLocatorInterface;
+use Zend\ServiceManager\Factory\AbstractFactoryInterface;
+use Interop\Container\ContainerInterface;
 
 class MigrationVersionTableGatewayAbstractFactory implements AbstractFactoryInterface
 {
     const FACTORY_PATTERN = '/migrations\.versiontablegateway\.(.*)/';
+        
     /**
      * Determine if we can create a service with name
      *
-     * @param ServiceLocatorInterface $serviceLocator
-     * @param $name
-     * @param $requestedName
+     * @param  mixed $container
+     * @param  mixed $requestedName
      * @return bool
      */
-    public function canCreateServiceWithName(ServiceLocatorInterface $serviceLocator, $name, $requestedName)
-    {
-        return preg_match(self::FACTORY_PATTERN, $name)
-            || preg_match(self::FACTORY_PATTERN, $requestedName);
+    public function canCreate(ContainerInterface $container, $requestedName) {
+        return preg_match(self::FACTORY_PATTERN, $requestedName);
     }
-
+    
     /**
      * Create service with name
      *
-     * @param ServiceLocatorInterface $serviceLocator
-     * @param $name
-     * @param $requestedName
-     * @return mixed
+     * @param  mixed $container
+     * @param  mixed $requestedName
+     * @param  mixed $options
+     * @return TableGateway 
      */
-    public function createServiceWithName(ServiceLocatorInterface $serviceLocator, $name, $requestedName)
-    {
-        preg_match(self::FACTORY_PATTERN, $name, $matches)
-            || preg_match(self::FACTORY_PATTERN, $requestedName, $matches);
+    public function __invoke(ContainerInterface $container, $requestedName, array $options = null) {
+        preg_match(self::FACTORY_PATTERN, $requestedName, $matches)
+        || preg_match(self::FACTORY_PATTERN, $requestedName, $matches);
         $adapter_name = $matches[1];
 
         /** @var $dbAdapter \Zend\Db\Adapter\Adapter */
-        $dbAdapter = $serviceLocator->get($adapter_name);
+        $dbAdapter = $container->get($adapter_name);
         $resultSetPrototype = new ResultSet();
         $resultSetPrototype->setArrayObjectPrototype(new MigrationVersion());
         return new TableGateway(MigrationVersion::TABLE_NAME, $dbAdapter, null, $resultSetPrototype);
