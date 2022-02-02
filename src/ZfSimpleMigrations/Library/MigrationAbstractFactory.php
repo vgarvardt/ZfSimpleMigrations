@@ -4,7 +4,7 @@ namespace ZfSimpleMigrations\Library;
 
 use RuntimeException;
 use Zend\Db\Adapter\Adapter;
-use Zend\ServiceManager\AbstractFactoryInterface;
+use Zend\ServiceManager\Factory\AbstractFactoryInterface;
 use Zend\ServiceManager\AbstractPluginManager;
 use ZfSimpleMigrations\Model\MigrationVersionTable;
 use Interop\Container\ContainerInterface;
