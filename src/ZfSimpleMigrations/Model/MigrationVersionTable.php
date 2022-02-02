@@ -20,8 +20,7 @@ class MigrationVersionTable
     {
         $insert = (new Insert())
             ->into($this->tableGateway->getTable())
-            ->columns(['version'])
-            ->values([$version]);
+            ->values(['version' => $version]);
 
         $this->tableGateway->insertWith($insert);
         return $this->tableGateway->lastInsertValue;
