@@ -30,11 +30,7 @@ class MigrationVersionTable
         $sql = sprintf('INSERT INTO "%s" ("version") VALUES (?) RETURNING "id"', $this->tableGateway->getTable());
         $stmt = $this->tableGateway->getAdapter()->getDriver()->createStatement($sql);
         $result = $stmt->execute([$version]);
-        $row = $result->current();
-
-        var_dump($row);
-
-        return 1;
+        return $result->current()["id"];
     }
 
     public function delete($version)
