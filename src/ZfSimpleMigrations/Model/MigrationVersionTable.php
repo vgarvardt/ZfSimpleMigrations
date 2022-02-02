@@ -2,7 +2,6 @@
 
 namespace ZfSimpleMigrations\Model;
 
-use Zend\Db\Sql\Insert;
 use Zend\Db\Sql\Select;
 use Zend\Db\TableGateway\TableGateway;
 
@@ -18,14 +17,24 @@ class MigrationVersionTable
 
     public function save($version): int
     {
-        $insert = (new Insert())
-            ->into($this->tableGateway->getTable())
-            ->values(['version' => $version]);
+        if ($this->tableGateway->getAdapter()->getPlatform()->getName() === 'PostgreSQL') {
+            return $this->savePg($version);
+        }
 
-        var_dump($insert->getSqlString($this->tableGateway->getAdapter()->getPlatform()));
-
-        $this->tableGateway->insertWith($insert);
+        $this->tableGateway->insert(['version' => $version]);
         return $this->tableGateway->lastInsertValue;
+    }
+
+    protected function savePg($version): int
+    {
+        $sql = sprintf('INSERT INTO "%s" ("version") VALUES ($1) RETURNING "id"', $this->tableGateway->getTable());
+        $stmt = $this->tableGateway->getAdapter()->getDriver()->createStatement($sql);
+        $result = $stmt->execute([$version]);
+        $row = $result->current();
+
+        var_dump($row);
+
+        return 1;
     }
 
     public function delete($version)

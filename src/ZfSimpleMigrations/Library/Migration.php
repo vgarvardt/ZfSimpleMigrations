@@ -127,7 +127,7 @@ class Migration implements ServiceLocatorAwareInterface
     protected function checkCreateMigrationTablePg()
     {
         $sql = <<<SQL
-CREATE TABLE IF NOT EXISTS %s (
+CREATE TABLE IF NOT EXISTS "%s" (
     id SERIAL PRIMARY KEY,
     version bigint UNIQUE
 );
@@ -364,7 +364,6 @@ SQL;
             $this->connection->commit();
         } catch (InvalidQueryException $e) {
             $this->connection->rollback();
-            var_dump($e);
             throw new MigrationException('Could not apply migration because of the invalid query', 0, $e);
         } catch (Throwable $e) {
             $this->connection->rollback();
