@@ -354,9 +354,9 @@ class Migration
      * Set service locator
      *
      * @param ServiceLocatorInterface $serviceLocator
-     * @return $this
+     * @return mixed
      */
-    public function setServiceLocator(ServiceLocatorInterface $serviceLocator): Migration
+    public function setServiceLocator(ContainerInterface $serviceLocator)
     {
         $this->serviceLocator = $serviceLocator;
 
@@ -368,7 +368,7 @@ class Migration
      *
      * @return ServiceLocatorInterface
      */
-    public function getServiceLocator(): ServiceLocatorInterface
+    public function getServiceLocator()
     {
         return $this->serviceLocator;
     }
