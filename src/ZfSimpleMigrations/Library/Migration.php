@@ -100,7 +100,7 @@ class Migration implements ServiceLocatorAwareInterface
      */
     protected function checkCreateMigrationTable()
     {
-        if ($this->adapter->getPlatform() === 'PostgreSQL') {
+        if ($this->adapter->getPlatform()->getName() === 'PostgreSQL') {
             $this->checkCreateMigrationTablePg();
             return;
         }
