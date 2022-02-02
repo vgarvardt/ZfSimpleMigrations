@@ -2,6 +2,7 @@
 
 namespace ZfSimpleMigrations\Model;
 
+use Zend\Db\Sql\Insert;
 use Zend\Db\Sql\Select;
 use Zend\Db\TableGateway\TableGateway;
 
@@ -17,7 +18,12 @@ class MigrationVersionTable
 
     public function save($version): int
     {
-        $this->tableGateway->insert(['version' => $version]);
+        $insert = (new Insert())
+            ->into($this->tableGateway->getTable())
+            ->columns(['version'])
+            ->values([$version]);
+
+        $this->tableGateway->insertWith($insert);
         return $this->tableGateway->lastInsertValue;
     }
 
