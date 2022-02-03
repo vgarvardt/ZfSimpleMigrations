@@ -188,7 +188,7 @@ Flag to log output of the migration. Defaults to `true`.
 
 The service alias that will be used to fetch a `Zend\Db\Adapter\Adapter` from the service manager.
 
-#### User configuration example:
+#### User configuration example
 
 ```php
 'migrations' => array(
